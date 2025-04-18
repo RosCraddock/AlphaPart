@@ -1,0 +1,51 @@
+rm(list=ls())
+library(AlphaPart)
+myebvs=read.table("~/Downloads/ped_ebvs_sex.txt", header=T)
+# number of generation 
+year=c(rep(1,1100))
+for (i in 2:11){ year=c(year,rep(i,2000)) }
+myebvs$year=year
+
+part <- AlphaPart(myebvs,
+                  colPath = "sex",
+                  colBV = "EBV")
+sumPartByYear <- summary(part, by = "year")
+plot(sumPartByYear,
+     col=c("red","blue"), main="EBVs OK")
+
+# now sum a constant (20) to EBVs
+myebvs$EBV2=myebvs$EBV + 20
+part <- AlphaPart(myebvs,
+                  colPath = "sex",
+                  colBV = "EBV2")
+sumPartByYear <- summary(part, by = "year")
+plot(sumPartByYear,
+     col=c("red","blue"),ylab="EBV-20")
+
+tmp <- myebvs[myebvs$year == 1,]
+hist(tmp$EBV2)
+
+tmp2 <- part$EBV2[part$EBV$year == 1,]
+hist(tmp2$EBV2)
+summary(tmp2$EBV2_pa)
+hist(tmp2$EBV2_ms)
+hist(tmp2$EBV2_1)
+hist(tmp2$EBV2_2)
+mean(tmp2$EBV2)
+mean(tmp2$EBV2_1)
+mean(tmp2$EBV2_2)
+tmp2Sex1 <- tmp2[tmp2$sex == 1,]
+tmp2Sex2 <- tmp2[tmp2$sex == 2,]
+mean(tmp2Sex1$EBV2)
+mean(tmp2Sex1$EBV2_1)
+mean(tmp2Sex1$EBV2_2)
+mean(tmp2Sex2$EBV2)
+mean(tmp2Sex2$EBV2_1)
+mean(tmp2Sex2$EBV2_2)
+par(mfrow = c(3, 2))
+hist(tmp2Sex1$EBV2)
+hist(tmp2Sex2$EBV2)
+hist(tmp2Sex1$EBV2_1)
+hist(tmp2Sex2$EBV2_1)
+hist(tmp2Sex1$EBV2_2)
+hist(tmp2Sex2$EBV2_2)
