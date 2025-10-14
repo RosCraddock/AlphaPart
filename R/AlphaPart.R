@@ -53,10 +53,11 @@
 #'   2(6):821-824. \doi{10.1017/S175173110800205X}
 #'
 #' @param x data.frame , with (at least) the following columns:
-#'   individual, father, and mother identif ication, and year of birth;
+#'   individual, father, and mother identification, and year of birth;
 #'   see arguments \code{colId}, \code{colFid}, \code{colMid},
 #'   \code{colPath}, and \code{colBV}; see also details about the
-#'   validity of pedigree.
+#'   validity of pedigree. For optional columns see arguments \code{colBy}, 
+#'   \code{colPaternalBV}, and \code{colMaternalBV}.
 #' @param pathNA Logical, set dummy path (to "XXX") where path
 #'   information is unknown (missing).
 #' @param recode Logical, internally recode individual, father and,
@@ -83,16 +84,24 @@
 #'   Parent 1 (say father), and one of Grandparents of Parent 2 (say
 #'   maternal grandfather).
 #' @param colId Numeric or character, position or name of a column
-#'   holding individual identif ication.
+#'   holding individual identification.
 #' @param colFid Numeric or character, position or name of a column
-#'   holding father identif ication.
+#'   holding father identification.
 #' @param colMid Numeric or character, position or name of a column
-#'   holding mother identif ication or maternal grandparent identif
+#'   holding mother identification or maternal grandparent identif
 #'   ication if \code{pedType="IPG"} .
 #' @param colPath Numeric or character, position or name of a column
 #'   holding path information.
 #' @param colBV Numeric or character, position(s) or name(s) of
 #'   column(s) holding breeding Values.
+#' @param colPaternalBV Numeric or character, position(s) or name(s) of a
+#'  column holding paternal breeding values calculated from the phased 
+#'  genotype probabilities. If provided along with \code{colMaternalBV}, these
+#'  values will be used to calculate the gametic partitioning.
+#' @param colMaternalBV Numeric or character, position(s) or name(s) of a
+#' column holding maternal breeding values calculated from the phased
+#' genotype probabilities. If provided along with \code{colPaternalBV}, these
+#' values will be used to calculate the gametic partitioning.
 #' @param colBy Numeric or character, position or name of a column
 #'   holding group information (see details).
 #' @param center Logical, if \code{center=TRUE} detect a shift in base
@@ -138,6 +147,7 @@
 #' * `lP` path labels
 #' * `nT` number of traits
 #' * `lT` trait labels 
+#' * `upgPresent` logical, whether unknown parent groups (UPG) are present in the pedigree
 #' * `warn` potential warning messages associated with this object
 #'
 #' If \code{colBy!=NULL} the resulting object is of a class
@@ -161,7 +171,8 @@ AlphaPart <- function (x, pathNA=FALSE, recode=TRUE, unknown= NA,
                        sort=TRUE, verbose=1, profile=FALSE,
                        printProfile="end", pedType="IPP", colId=1,
                        colFid=2, colMid=3, colPath=4, colBV=5:ncol(x),
-                       colBy=NULL, center = TRUE, upgValues = NULL, 
+                       colPaternalBV=NULL, colMaternalBV=NULL, colBy=NULL, 
+                       center = TRUE, upgValues = NULL, 
                        scaleEBV = list()) {
   ## Test if the data is a data.frame
   if(is_tibble(x)){
@@ -177,6 +188,13 @@ AlphaPart <- function (x, pathNA=FALSE, recode=TRUE, unknown= NA,
     groupSummary <- FALSE
   } else {
     groupSummary <- TRUE
+  }
+  
+  #TODO: Add user-warnings if only one of colPaternalBV or colMaternalBV is provided
+  if(is.null(colPaternalBV) | is.null(colMaternalBV)){
+    gameticPartition <- FALSE
+  } else{
+    gameticPartition <- TRUE
   }
 
   test <- pedType %in% c("IPP", "IPG")
@@ -262,6 +280,22 @@ AlphaPart <- function (x, pathNA=FALSE, recode=TRUE, unknown= NA,
     }
     testN <- NULL # not needed anymore
   }
+  if(gameticPartition & !is.numeric(colPaternalBV)){
+    testN <- length(colPaternalBV)
+    colBV <- which(colnames(x) %in% colPaternalBV)
+    if (length(colPaternalBV) != testN) {
+      stop("Identification not valid for 'colPaternalBV' column(s) name", call. = FALSE)
+    }
+    testN <- NULL # not needed anymore
+  }
+  if(gameticPartition & !is.numeric(colMaternalBV)){
+    testN <- length(colMaternalBV)
+    colBV <- which(colnames(x) %in% colMaternalBV)
+    if (length(colMaternalBV) != testN) {
+      stop("Identification not valid for 'colMaternalBV' column(s) name", call. = FALSE)
+    }
+    testN <- NULL # not needed anymore
+  }
   #=====================================================================
   ## --- Sort and recode pedigree ---
   #=====================================================================
@@ -280,6 +314,40 @@ AlphaPart <- function (x, pathNA=FALSE, recode=TRUE, unknown= NA,
   if (any(test)) {
     stop("colBV columns must be numeric!")
     str(x)
+  }
+  #---------------------------------------------------------------------
+  ## If gametic partitioning make sure that colPaternalBV and colMaternalBV:
+  ## columns are numeric,
+  ## the same length as colBV,
+  ## the columns sum to the columns of colBV.
+  
+  if (gameticPartition){
+    test <- !sapply(x[, c(colPaternalBV)], is.numeric)
+    if (any(test)) {
+      stop("colPaternalBV columns must be numeric!")
+      str(x)
+    }
+    test <- !sapply(x[, c(colMaternalBV)], is.numeric)
+    if (any(test)) {
+      stop("colMaternalBV columns must be numeric!")
+      str(x)
+    } 
+    test <- length(colPaternalBV) != length(colMaternalBV)
+    if (any(test)){
+      stop(paste("colPaternalBV has length ", length(colPaternalBV), 
+                  ", while colMaternalBV has length ", length(colMaternalBV),
+                  ". Hence, gametic partitioning cannot be performed.", sep = ""))
+    }
+    test <- length(colPaternalBV) != length(colBV)
+    if (any(test)){
+      stop(paste("colPaternalBV and colMaternalBV has length ", length(colPaternalBV), 
+                  ", while colBV has length ", length(colBV),
+                  ". Hence, gametic partitioning cannot be performed.", sep = ""))
+    }
+    test <- any(x[, c(colPaternalBV)] + x[, c(colMaternalBV)] != x[, c(colBV)])
+    if (any(test)){
+      stop("The sum of colPaternalBV and colMaternalBV must be equal to colBV for each individual.")
+    }
   }
   #---------------------------------------------------------------------
   ## tests for when upg in pedigree
@@ -352,7 +420,14 @@ AlphaPart <- function (x, pathNA=FALSE, recode=TRUE, unknown= NA,
       }
     }
   }
-  y <- cbind(y, as.matrix(x[, colBV]))
+  if (!gameticPartition){
+    y <- cbind(y, as.matrix(x[, colBV]))
+    nGP <- 1 # Number of genetic partitions: total
+  } else {
+    y <- cbind(y, as.matrix(x[, colBV]), as.matrix(x[, colPaternalBV]), as.matrix(x[, colMaternalBV]))
+    nGP <- 3 # Number of genetic partitions: total, paternal, maternal
+  }
+  
   #=====================================================================
   ## Test if father and mother codes precede children code -
   ## computational engine needs this
@@ -502,7 +577,7 @@ AlphaPart <- function (x, pathNA=FALSE, recode=TRUE, unknown= NA,
                  nI_=nI, nP_=nP, nT_=nT,
                  y_=y, 
                  P_=P, Px_=cumsum(c(0, rep(nP, nT-1))),
-                 upgCon_=upgCon,
+                 upgCon_=upgCon, nGP_=nGP,
                  PACKAGE="AlphaPart")
   } else {
     N <- aggregate(x=y[-1, -c(1:3)], by=list(by=x[, colBy]), FUN=length)
@@ -517,8 +592,14 @@ AlphaPart <- function (x, pathNA=FALSE, recode=TRUE, unknown= NA,
   }
   #---------------------------------------------------------------------
   ## Assign nice column names
-  colnames(tmp$pa) <- paste(lT, "_pa", sep="")
-  colnames(tmp$w)  <- paste(lT, "_w", sep="")
+  if (gameticPartition){
+    lPT <- colnames(x[, c(colBV, colPaternalBV, colMaternalBV), drop=FALSE])
+    colnames(tmp$pa) <- paste(lPT, "_pa", sep="")
+    colnames(tmp$w)  <- paste(lPT, "_w", sep="")
+  } else {
+    colnames(tmp$pa) <- paste(lT, "_pa", sep="")
+    colnames(tmp$w)  <- paste(lT, "_w", sep="")
+  }
   colnames(tmp$xa) <- c(t(outer(lT, lP, paste, sep="_")))
   if (upgPresent) {
     colnames(tmp$upgCon) <- paste(lT, "_upg", sep="")
@@ -549,16 +630,39 @@ AlphaPart <- function (x, pathNA=FALSE, recode=TRUE, unknown= NA,
 
   #=====================================================================
   if (upgPresent){
-    for (j in 1:nT) { ## j <- 1
-      Py <- seq(t+1, t+nP)
-      ret[[j]] <- cbind(tmp$pa[-1, j], tmp$w[-1, j], tmp$upgCon[-1,j], tmp$xa[-1, Py])
-      colnames(ret[[j]]) <- c(colP[j], colW[j], colUPG[j], colX[Py])
-      t <- max(Py)
+    if (gameticPartition) {
+      for (j in 1:nT) { ## j <- 1
+        Py <- seq(t+1, t+nP)
+        gP <- c(j, j+nT, j+2*nT)
+        ret[[j]] <- cbind(tmp$pa[-1, gP], tmp$w[-1, gP], tmp$upgCon[-1,j], tmp$xa[-1, Py])
+        colnames(ret[[j]]) <- c(colP[gP], colW[gP], colUPG[j], colX[Py])
+        t <- max(Py)
+      }
+      tlP <- c(lP, "upg")
+      lP <- levels(as.factor(tlP))
+      nP <- length(lP)
+    } else {
+      for (j in 1:nT) { ## j <- 1
+        Py <- seq(t+1, t+nP)
+        ret[[j]] <- cbind(tmp$pa[-1, j], tmp$w[-1, j], tmp$upgCon[-1,j], tmp$xa[-1, Py])
+        colnames(ret[[j]]) <- c(colP[j], colW[j], colUPG[j], colX[Py])
+        t <- max(Py)
+      }
+      tlP <- c(lP, "upg")
+      lP <- levels(as.factor(tlP))
+      nP <- length(lP)
     }
-    tlP <- c(lP, "upg")
-    lP <- levels(as.factor(tlP))
-    nP <- length(lP)
+    
   } else {
+    if (gameticPartition) {
+      for (j in 1:nT) { ## j <- 1
+        Py <- seq(t+1, t+nP)
+        gP <- c(j, j+nT, j+2*nT)
+        ret[[j]] <- cbind(tmp$pa[-1, gP], tmp$w[-1, gP], tmp$xa[-1, Py])
+        colnames(ret[[j]]) <- c(colP[gP], colW[gP], colX[Py])
+        t <- max(Py)
+      }
+    } else
     for (j in 1:nT) { ## j <- 1
       Py <- seq(t+1, t+nP)
       ret[[j]] <- cbind(tmp$pa[-1, j], tmp$w[-1, j], tmp$xa[-1, Py])

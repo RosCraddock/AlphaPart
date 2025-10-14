@@ -15,6 +15,6 @@
  * on Rcpp-devel for a misuse of RcppExport
  */
 
-RcppExport SEXP AlphaPartDrop(SEXP c1_, SEXP c2_, SEXP nI_, SEXP nP_, SEXP nT_, SEXP y_, SEXP P_, SEXP Px_, SEXP upgCon_) ;
+RcppExport SEXP AlphaPartDrop(SEXP c1_, SEXP c2_, SEXP nI_, SEXP nP_, SEXP nT_, SEXP y_, SEXP P_, SEXP Px_, SEXP upgCon_, SEXP nGP_) ;
 
 #endif

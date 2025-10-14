@@ -1,13 +1,13 @@
 #include "AlphaPartDrop.h"
 
-SEXP AlphaPartDrop(SEXP c1_, SEXP c2_, SEXP nI_, SEXP nP_, SEXP nT_, SEXP y_, SEXP P_, SEXP Px_, SEXP upgCon_)
+SEXP AlphaPartDrop(SEXP c1_, SEXP c2_, SEXP nI_, SEXP nP_, SEXP nT_, SEXP y_, SEXP P_, SEXP Px_, SEXP upgCon_, SEXP nGP_)
 {
   using namespace Rcpp ;
   //' @export
 
   // --- Temp ---
       
-  int i, j, k, t, p;
+  int i, j, k, t, p, pt, mt;
   
   // --- Inputs ---
       
@@ -16,6 +16,7 @@ SEXP AlphaPartDrop(SEXP c1_, SEXP c2_, SEXP nI_, SEXP nP_, SEXP nT_, SEXP y_, SE
   int nI = Rcpp::as<int>(nI_); 
   int nP = Rcpp::as<int>(nP_);
   int nT = Rcpp::as<int>(nT_);
+  int nGP = Rcpp::as<int>(nGP_);
   Rcpp::NumericMatrix ped(y_);
   Rcpp::IntegerVector P(P_);  
   Rcpp::IntegerVector Px(Px_);
@@ -23,8 +24,8 @@ SEXP AlphaPartDrop(SEXP c1_, SEXP c2_, SEXP nI_, SEXP nP_, SEXP nT_, SEXP y_, SE
   
   // --- Outputs ---
       
-  Rcpp::NumericMatrix pa(nI+1, nT);    // parent average
-  Rcpp::NumericMatrix  w(nI+1, nT);    // Mendelian sampling
+  Rcpp::NumericMatrix pa(nI+1, nT*nGP);    // parent average
+  Rcpp::NumericMatrix  w(nI+1, nT*nGP);    // Mendelian sampling
   Rcpp::NumericMatrix xa(nI+1, nP*nT); // Parts
 
   // --- Compute ---
@@ -43,6 +44,22 @@ SEXP AlphaPartDrop(SEXP c1_, SEXP c2_, SEXP nI_, SEXP nP_, SEXP nT_, SEXP y_, SE
     
       // Mendelian sampling (MS)
       w(i, t) = ped(i, 3+t) - pa(i, t);
+      
+      // Gamete Partitioning
+      if (nGP == 3) {
+        pt = t + nT; // paternal trait index
+        mt = t + 2*nT; // maternal trait index
+        if (ped(i, 1) == 0 && ped(i,2) == 0){
+          pa(i, pt) = c1*upgCon(i, t);
+          pa(i, mt) = c2*upgCon(i, t);
+        } 
+        else {
+          pa(i, pt) = c1 * ped(ped(i,1), 3+pt) + c1 * ped(ped(i,1), 3+mt);
+          pa(i, mt) = c2 * ped(ped(i,2), 3+pt) + c2 * ped(ped(i,2), 3+mt);
+        }
+        w(i, mt) = ped(i, 3+mt) - pa(i, mt);
+        w(i, pt) = ped(i, 3+pt) - pa(i, pt);
+      }
     
       // Parts
 
