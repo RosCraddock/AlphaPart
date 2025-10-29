@@ -596,11 +596,13 @@ AlphaPart <- function (x, pathNA=FALSE, recode=TRUE, unknown= NA,
     lPT <- colnames(x[, c(colBV, colPaternalBV, colMaternalBV), drop=FALSE])
     colnames(tmp$pa) <- paste(lPT, "_pa", sep="")
     colnames(tmp$w)  <- paste(lPT, "_w", sep="")
+    colnames(tmp$xa) <- c(paste0("bv_", unique(x[,colPath])), paste0("bv_f", unique(x[,colPath])), paste0("bv_m", unique(x[,colPath])))
   } else {
     colnames(tmp$pa) <- paste(lT, "_pa", sep="")
     colnames(tmp$w)  <- paste(lT, "_w", sep="")
+    colnames(tmp$xa) <- c(t(outer(lT, lP, paste, sep="_")))
   }
-  colnames(tmp$xa) <- c(t(outer(lT, lP, paste, sep="_")))
+  
   if (upgPresent) {
     colnames(tmp$upgCon) <- paste(lT, "_upg", sep="")
   }
@@ -656,7 +658,7 @@ AlphaPart <- function (x, pathNA=FALSE, recode=TRUE, unknown= NA,
   } else {
     if (gameticPartition) {
       for (j in 1:nT) { ## j <- 1
-        Py <- seq(t+1, t+nP)
+        Py <- c(j-1+seq(t+1, t+nP), j-1+nT*nP+seq(t+1, t+nP), j-1+2*nT*nP+seq(t+1, t+nP))
         gP <- c(j, j+nT, j+2*nT)
         ret[[j]] <- cbind(tmp$pa[-1, gP], tmp$w[-1, gP], tmp$xa[-1, Py])
         colnames(ret[[j]]) <- c(colP[gP], colW[gP], colX[Py])
@@ -681,26 +683,44 @@ AlphaPart <- function (x, pathNA=FALSE, recode=TRUE, unknown= NA,
   ## Add initial data
   #=====================================================================
   if (!groupSummary) {
-    for (i in 1:nT) {
-      ## Hassle in order to get all columns and to be able to work with
-      ##   numeric or character column "names"
-      colX <- colX2 <- colnames(x)
-      names(colX) <- colX; names(colX2) <- colX2
-      ## ... put current agv in the last column in original data
-      colX <- c(colX[!(colX %in% colX[colBV[i]])], colX[colBV[i]])
-      ## ... remove other traits
-      colX <- colX[!(colX %in% colX2[(colX2 %in% colX2[colBV]) & !
-                                       (colX2 %in% colX2[colBV[i]])])]
-      ret[[i]] <- cbind(x[, colX], as.data.frame(ret[[i]]))
-      rownames(ret[[i]]) <- NULL
+    if (!gameticPartition){
+      for (i in 1:nT) {
+        ## Hassle in order to get all columns and to be able to work with
+        ##   numeric or character column "names"
+        colX <- colX2 <- colnames(x)
+        names(colX) <- colX; names(colX2) <- colX2
+        ## ... put current agv in the last column in original data
+        colX <- c(colX[!(colX %in% colX[colBV[i]])], colX[colBV[i]])
+        ## ... remove other traits
+        colX <- colX[!(colX %in% colX2[(colX2 %in% colX2[colBV]) & !
+                                         (colX2 %in% colX2[colBV[i]])])]
+        ret[[i]] <- cbind(x[, colX], as.data.frame(ret[[i]]))
+        rownames(ret[[i]]) <- NULL
+      }
+    } else {
+      for (i in 1:nT) {
+        ## Hassle in order to get all columns and to be able to work with
+        ##   numeric or character column "names"
+        colX <- colX2 <- colnames(x)
+        names(colX) <- colX; names(colX2) <- colX2
+        ## ... put current agv in the last three columns in original data
+        colX <- c(colX[!(colX %in% c(colX[colBV[i]], colX[colPaternalBV[i]], colX[colMaternalBV[i]]))],
+                  colX[colBV[i]], colX[colPaternalBV[i]], colX[colMaternalBV[i]])
+        ## ... remove other traits
+        colX <- colX[!(colX %in% colX2[(colX2 %in% c(colX2[colBV], colX2[colPaternalBV], colX2[colMaternalBV])) & !
+                                         (colX2 %in% c(colX2[colBV[i]], colX2[colPaternalBV[i]], colX2[colMaternalBV[i]]))])]
+        ret[[i]] <- cbind(x[, colX], as.data.frame(ret[[i]]))
+        rownames(ret[[i]]) <- NULL
+      }
     }
+    
   }
   #---------------------------------------------------------------------
   ## Additional (meta) info. on number of traits and paths for other
   ## methods
   tmp <- colnames(x); names(tmp) <- tmp
   ret[[nT+1]] <- list(path=tmp[colPath], nP=nP, lP=lP, nT=nT, lT=lT, 
-                      upgPresent=upgPresent, warn=NULL)
+                      upgPresent=upgPresent, gameticPartition=gameticPartition, warn=NULL)
   ## names(ret)[nT+1] <- "info"
   names(ret) <- c(lT, "info")
 

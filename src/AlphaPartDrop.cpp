@@ -26,7 +26,7 @@ SEXP AlphaPartDrop(SEXP c1_, SEXP c2_, SEXP nI_, SEXP nP_, SEXP nT_, SEXP y_, SE
       
   Rcpp::NumericMatrix pa(nI+1, nT*nGP);    // parent average
   Rcpp::NumericMatrix  w(nI+1, nT*nGP);    // Mendelian sampling
-  Rcpp::NumericMatrix xa(nI+1, nP*nT); // Parts
+  Rcpp::NumericMatrix xa(nI+1, nP*nT*nGP); // Parts
 
   // --- Compute ---
       
@@ -66,12 +66,25 @@ SEXP AlphaPartDrop(SEXP c1_, SEXP c2_, SEXP nI_, SEXP nP_, SEXP nT_, SEXP y_, SE
       // ... for the MS part
       j = Px[t] + P[i];
       xa(i, j) = w(i, t);
+      
+      if (nGP == 3) {
+        j = Px[t] + P[i] + (nT*nP);
+        xa(i, j) = w(i, pt);
+        j = Px[t] + P[i] + (nT*nP*2);
+        xa(i, j) = w(i, mt);
+      }
 
       // ... for the PA parts
       for(p = 0; p < nP; p++) {
         j = Px[t] + p;
         xa(i, j) += c1 * xa(ped(i, 1), j) +
                     c2 * xa(ped(i, 2), j);
+        if (nGP == 3) {
+          j = Px[t] + p + (nT*nP);
+          k = Px[t] + p + (nT*nP*2);
+          xa(i, j) += c1 * xa(ped(i, 1), j) + c1 * xa(ped(i, 1), k);
+          xa(i, k) += c2 * xa(ped(i, 2), j) + c2 * xa(ped(i, 2), k);
+        }
       }
       
       // collect the upg contributions

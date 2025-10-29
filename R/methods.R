@@ -263,7 +263,8 @@ summary.AlphaPart <- function(object, by=NULL, FUN=mean, labelSum="Sum",
   }
 
   ret$info <- list(path=object$info$path, nP=nP, nCov=nCov, lP=lP,
-                   nT=nT, lT=lT, by=by, warn=object$info$warn, 
+                   nT=nT, lT=lT, by=by, gameticPartition=object$info$gameticPartition, 
+                   warn=object$info$warn, 
                    upgPresent=upgPresent, labelSum=labelSum)
   #---------------------------------------------------------------------
   ## --- Compute ---
@@ -273,8 +274,11 @@ summary.AlphaPart <- function(object, by=NULL, FUN=mean, labelSum="Sum",
      ## Setup
      cols <- c(lT[i], paste(lT[i], lP, sep="_"))
      checkCov <- length(cols[-1])>1 ## do not run cov if path has 1 level
+     if (object$info$gameticPartition) {
+       cols <- c(cols, paste(lT[i], lP, sep="_f"), paste(lT[i], lP, sep = "_m"))
+     }
      paths <- cols
-     paths[2:length(paths)] <- ret$info$lP
+     paths[2:length(paths)] <- paste(ret$info$lP, c(rep("i", nP), rep("f", nP), rep("m", nP)), sep= "_")
      paths[1] <- labelSum
 
     ## Summarize Variance Partitioning
@@ -516,6 +520,7 @@ plot.summaryAlphaPart <-
     nP    <- x$info$nP + x$info$nCov
     ret   <- vector(mode="list", length=nT)
     names(ret) <- x$info$lT
+    ifelse(x$info$gameticPartition, nGP <- 3, nGP <- 1)
 
     ## Axis labels
     if (!is.null(xlab) && length(xlab) > 1) stop("you can provide only one value for 'xlab'")
@@ -557,10 +562,18 @@ plot.summaryAlphaPart <-
     #-------------------------------------------------------------------
     ## Line type
     if (is.null(lineTypeList)) {
-      if (length(lineType) < nP) {
-        lineType <- c(1, rep(x=lineType, times=nP))
+      if (x$info$gameticPartition){
+        if (length(lineType) < (nP*3)) {
+          lineType <- c(1, rep(x=lineType, times=nP*3))
+        } else {
+          lineType <- c(1, lineType)
+        }
       } else {
-        lineType <- c(1, lineType)
+        if (length(lineType) < nP) {
+          lineType <- c(1, rep(x=lineType, times=nP))
+        } else {
+          lineType <- c(1, lineType)
+        }
       }
   }
     #-------------------------------------------------------------------
@@ -587,7 +600,7 @@ plot.summaryAlphaPart <-
       if (is.logical(sortValue)) {
         if (sortValue) {
           nC <- ncol(tmp0)
-          pathStat <- sapply(X=tmp0[, (nC - nP + 1):nC], FUN=sortValueFUN,
+          pathStat <- sapply(X=tmp0[, (nC - (nP*nGP) + 1):nC], FUN=sortValueFUN,
                              na.rm=TRUE)
           levs <- names(sort(pathStat, decreasing=sortValueDec))
           tmp$path <- factor(tmp$path, levels=c(x$info$labelSum, levs))
