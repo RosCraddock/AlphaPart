@@ -764,3 +764,184 @@ test_that("Test computation - 2nd example", {
   expect_true(part$trait1$trait1_domestic[part$trait1$id == "V"] == 68.875)
   expect_true(part$trait1$trait1_import[part$trait1$id == "V"] == 40.125)
 })
+
+test_that("no UPGs and non-zero founder mean produces warning", {
+  ped <- data.frame(
+    id = c("A", "B", "C"),
+    fid = c(NA, NA, "A"),
+    mid = c(NA, NA, "B"),
+    path = c("A", "B", "C"),
+    trait1 = c(1, 3, 2)
+  )
+
+  warning_message <- NULL
+
+  withCallingHandlers(
+    AlphaPart(x = ped, colId = "id", colFid = "fid", colMid = "mid", colPath = "path", colBV = "trait1", verbose = 0),
+    warning = function(condition) {
+      warning_message <<- conditionMessage(condition)
+      invokeRestart("muffleWarning")
+    }
+  )
+
+  expect_true(grepl("centering", warning_message, ignore.case = TRUE))
+  expect_true(grepl("UPG", warning_message, ignore.case = TRUE))
+})
+
+test_that("UPG has it's own record",{
+  ped <- data.frame(
+    id = c("A", "B", "C"),
+    fid = c("UPG1", NA, "A"),
+    mid = c("UPG1", NA, "B"),
+    path = c("A", "B", "C"),
+    trait1 = c(1, 2, 1.5)
+  )
+
+  expect_error(
+    AlphaPart(x = ped, colId = "id", colFid = "fid", colMid = "mid", colPath = "path", colBV = "trait1", verbose = 0, UPGname = "UPG"),
+    regexp = "own record|record.*UPG|unknown parent group"
+  )
+})
+
+test_that("duplicate UPG records produce an error", {
+  ped <- data.frame(
+    id = c("UPG1", "UPG1", "A", "B", "C"),
+    fid = c(NA, NA, "UPG1", "UPG1", "A"),
+    mid = c(NA, NA, "UPG1", "UPG1", "B"),
+    path = c("UPG1", "UPG1", "A", "B", "C"),
+    trait1 = c(1, 1, 1, 2, 1.5)
+  )
+
+  expect_error(
+    AlphaPart(x = ped, colId = "id", colFid = "fid", colMid = "mid", colPath = "path", colBV = "trait1", verbose = 0, UPGname = "UPG"),
+    regexp = "only one record|duplicate|unique"
+  )
+})
+
+test_that("UPG records must have unknown parents", {
+  ped <- data.frame(
+    id = c("A", "B", "UPG1", "C"),
+    fid = c(NA, NA, "A", "UPG1"),
+    mid = c(NA, NA, "B", "UPG1"),
+    path = c("A", "B", "UPG1", "C"),
+    trait1 = c(1, 2, 1.5, 1.5)
+  )
+
+  expect_error(
+    AlphaPart(x = ped, colId = "id", colFid = "fid", colMid = "mid", colPath = "path", colBV = "trait1", verbose = 0, UPGname = "UPG"),
+    regexp = "unknown parent"
+  )
+})
+
+test_that("UPG records must have breeding values", {
+  ped <- data.frame(
+    id = c("UPG1", "A", "B", "C"),
+    fid = c(NA, "UPG1", "UPG1", "A"),
+    mid = c(NA, "UPG1", "UPG1", "B"),
+    path = c("UPG1", "A", "B", "C"),
+    trait1 = c(NA, 1, 2, 1.5)
+  )
+
+  expect_error(
+    AlphaPart(x = ped, colId = "id", colFid = "fid", colMid = "mid", colPath = "path", colBV = "trait1", verbose = 0, UPGname = "UPG"),
+    regexp = "genetic value"
+  )
+})
+
+test_that("UPG records must have their own path", {
+  ped <- data.frame(
+    id = c("UPG1", "A", "B", "C"),
+    fid = c(NA, "UPG1", "UPG1", "A"),
+    mid = c(NA, "UPG1", "UPG1", "B"),
+    path = c("A", "A", "B", "C"),
+    trait1 = c(1.5, 1, 2, 1.5)
+  )
+
+  expect_error(
+    AlphaPart(x = ped, colId = "id", colFid = "fid", colMid = "mid", colPath = "path", colBV = "trait1", verbose = 0, UPGname = "UPG"),
+    regexp = "own path|path"
+  )
+})
+
+test_that("UPG breeding values differing from founder means produce a warning", {
+  ped <- data.frame(
+    id = c("UPG1", "A", "B", "C"),
+    fid = c(NA, "UPG1", "UPG1", "A"),
+    mid = c(NA, "UPG1", "UPG1", "B"),
+    path = c("UPG1", "A", "B", "C"),
+    trait1 = c(10, 2, 4, 3)
+  )
+
+  warning_message <- NULL
+
+  withCallingHandlers(
+    AlphaPart(x = ped, colId = "id", colFid = "fid", colMid = "mid", colPath = "path", colBV = "trait1", verbose = 0, UPGname = "UPG"),
+    warning = function(condition) {
+      warning_message <<- conditionMessage(condition)
+      invokeRestart("muffleWarning")
+    }
+  )
+
+  expect_true(grepl("UPG1", warning_message, fixed = TRUE))
+  expect_true(grepl("mean", warning_message, ignore.case = TRUE))
+})
+
+test_that("UPG prefixes containing regex characters are matched literally", {
+  ped <- data.frame(
+    id = c("MF.1", "MFx1", "A", "B", "C"),
+    fid = c(NA, "MF.1", "MF.1", "MF.1", "A"),
+    mid = c(NA, "MF.1", "MF.1", "MF.1", "B"),
+    path = c("MF.1", "MFx1", "A", "B", "C"),
+    trait1 = c(35, 99, 2, 4, 3)
+  )
+
+  expect_silent(
+    AlphaPart(x = ped, colId = "id", colFid = "fid", colMid = "mid", colPath = "path", colBV = "trait1", verbose = 0, UPGname = "MF.")
+  )
+})
+
+test_that("half-founders contribute one half to the founder mean", {
+  ped <- data.frame(
+    id = c("A", "B", "C", "D"),
+    fid = c(NA, NA, "A", "A"),
+    mid = c(NA, NA, "B", NA),
+    path = c("A", "B", "C", "D"),
+    trait1 = c(1, -1, 0, 2)
+  )
+
+  # Complete-founder mean is zero:
+  # mean(c(1, -1)) == 0
+  #
+  # Weighted founder mean includes D as a half-founder:
+  # (1 * 1 + (-1) * 1 + 2 * 0.5) / (1 + 1 + 0.5) = 0.4
+  #
+  # Therefore a warning is expected only if half-founders are included.
+
+  warning_message <- NULL
+
+  withCallingHandlers(
+    AlphaPart(x = ped, colId = "id", colFid = "fid", colMid = "mid", colPath = "path", colBV = "trait1", verbose = 0),
+    warning = function(condition) {
+      warning_message <<- conditionMessage(condition)
+      invokeRestart("muffleWarning")
+    }
+  )
+
+  expect_true(grepl("centering", warning_message, ignore.case = TRUE))
+  expect_true(grepl("trait1", warning_message, fixed = TRUE))
+})
+
+test_that("incorrectly labelled UPG", {
+  ped <- data.frame(
+    id = c("MF.1", "MFx2", "A", "B", "C"),
+    fid = c(NA, NA, "MF.1", "MF.1", "A"),
+    mid = c(NA, NA, "MF.1", "MF.1", "B"),
+    path = c("MF.1", "MFx2", "A", "B", "C"),
+    trait1 = c(3, 4, 2, 4, 3)
+  )
+
+  expect_error(
+    AlphaPart(x = ped, colId = "id", colFid = "fid", colMid = "mid", colPath = "path", colBV = "trait1", verbose = 0, UPGname = "MF."),
+    regexp = "MFx2|assigned a UPG"
+  )
+})

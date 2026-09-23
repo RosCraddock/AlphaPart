@@ -9,7 +9,7 @@ test_that("Test print.PlotSummary.AlphaPart", {
                      gen=c(  1,   1,   2,   2,   3,   3))
 
   ## Partition additive genetic values
-  tmp <- AlphaPart(x=ped, colBV="trt1", center = FALSE)
+  tmp <- AlphaPart(x=ped, colBV="trt1")
   sum <- summary(tmp, by="gen")
   k <- print(plot.summaryAlphaPart(sum))
   expect_equal(k,NULL)

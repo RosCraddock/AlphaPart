@@ -12,7 +12,7 @@ test_that("Test Printsummary.AlphaPart", {
                      gen=c(  1,   1,   2,   2,   3,   3))
 
   ## Partition additive genetic values
-  tmp <- AlphaPart(x=ped, colBV=c("trt1", "trt2"), center = FALSE)
+  tmp <- AlphaPart(x=ped, colBV=c("trt1", "trt2"))
   ## Test summary for trt1
   expect_equal(print.AlphaPart(summary(tmp, by="gen")), NULL)
 })

@@ -1,6 +1,6 @@
 ---
 title: "AlphaPart: Accounting for non-zero mean and structure in founders"
-author: "Ros Craddock and Gregor Gorjanc"
+author: "Rosalind Craddock and Gregor Gorjanc"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -13,15 +13,326 @@ vignette: >
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-TODO: Double check AlphaPart and genetic groups #7
-      https://github.com/AlphaGenes/AlphaPart/issues/7
-
 ## Introduction
 
-* TODO: Cite Ros' paper on partitioning with non-zero mean in founders and metafounders #42
-        https://github.com/AlphaGenes/AlphaPart/issues/42
+-   TODO: Cite Ros' paper on partitioning with non-zero mean in founders and metafounders #42 <https://github.com/AlphaGenes/AlphaPart/issues/42>
+
+The objective of this vignette is to demonstrate the different approaches possible by the user for the partitioning of genetic trends using the AlphaPart R package. Within, we will clarify the reasoning behind either centering or including unknown parent groups (otherwise known as metafounders) in the partitioning of genetic values to account for non-zero mean in the founders. Throughout, a simple pedigree example is used to demonstrate the approaches and the theory behind them. The example is not intended to be realistic, but rather to be simple and well balanced to clearly demonstrate the principles. Only one trait is used, however, the same principles apply to more complex pedigrees and multiple traits.
+
+## Load packages
+
+```{r}
+rm(list=ls())
+library(AlphaPart)
+```
+
+## Create pedigree
+
+We will use a simple seven individual pedigree with one trait. These will be referred to as genetic values, however, they could be breeding values, genotypes, or any other additive genetic estimate.
+
+```{r}
+ped <- data.frame(
+    id = c(1:7),
+    fid = c(0, 0, 0, 0, 1, 3, 6),
+    mid = c( 0, 0, 0, 0, 2, 4, 5),
+    sex = c("male", "female", "male", "female", "female", "male", "male"),
+    gen = c(1, 1, 1, 1, 2, 2, 3),
+    trait1=c(-6.25, -5.25, 0.75, 10.75, -2.25, 0.75, 3.75))
+
+print(ped)
+```
+
+## When founders have mean genetic value equal to zero
+
+Here, individuals 1 to 4 are the founders with no known parents (fid and mid are equal to 0). The mean genetic value of the founders for `trait1` is 0. Since the founders have no known parents, the genetic value is equal to their Mendelian sampling term. Thus, when the mean genetic value of the founders is zero, the mean of their Mendelian sampling term is zero, which aligns with the model assumption of `AlphaPart`. Thus, we can directly use the pedigree above for partitioning of `trait1` genetic values by sex without any modifications.
+
+```{r}
+mean(ped$trait1[ped$fid==0 & ped$mid==0])
+```
+
+```{r}
+part <- AlphaPart(x = ped, colId = "id", colFid = "fid", colMid = "mid", colPath = "sex", colBV = "trait1")
+# Print dataframe of results
+part[["trait1"]]
+# Summarise by generation for plotting
+partSum <- summary(part, by = "gen")
+plot(partSum)
+```
+
+## When founders have non-zero mean genetic value
+
+But, what if the mean genetic value of the founders is not zero? Consider the same pedigree below with new trait values such that the mean genetic value of the founders is not 0, but 11.25.
+
+```{r}
+ped$trait1 <- c(5, 6, 12, 22, 9, 12, 15)
+
+mean(ped$trait1[ped$fid==0 & ped$mid==0])
+
+```
+
+Then run through AlphaPart as before.
+
+```{r}
+part <- AlphaPart(x = ped, colId = "id", colFid = "fid", colMid = "mid", colPath = "sex", colBV = "trait1")
+# Print dataframe of results
+part[["trait1"]]
+# Summarise by generation for plotting
+partSum <- summary(part, by = "gen")
+plot(partSum)
+```
+
+As noted, this produces a warning since the founders' mean genetic value for trait 1 is not zero. However, results are still produced. Whether they are meaningful depends on the specific model and assumptions used in estimating the genetic values. In this case, however, they are **not correct**.
+
+To obtain correct results, we need to either center the genetic values such that the mean of the founders genetic value (`trait1`) is zero or include unknown parent groups in the pedigree.
+
+### Centering genetic values
+
+First, we will center the genetic values by subtracting the mean of the founders from all individuals.
+
+```{r}
+ped$trait1Centered <- ped$trait1 - mean(ped$trait1[ped$fid==0 & ped$mid==0])
+mean(ped$trait1Centered[ped$fid==0 & ped$mid==0])
+```
+
+Now we can run AlphaPart as before.
+
+```{r}
+part <- AlphaPart(x = ped, colId = "id", colFid = "fid", colMid = "mid", colPath = "sex", colBV = "trait1Centered")
+# Print dataframe of results
+part[["trait1Centered"]]
+# Summarise by generation for plotting
+partSum <- summary(part, by = "gen")
+plot(partSum)
+```
+
+As we can see from the graph above, the partitioned genetic trends are now relative to the base population. Thus, describing the within pedigree partition (as the data is limited to). However, the 'Sum' line now represents the centered genetic trend, not the actual genetic trend. Hence, the inclusion of unknown parent groups may be preferred.
+
+### Including unknown parent groups
+
+By including unknown parent groups (also known as metafounders), the model considers the baseline contribution from the missing ancestry through additional partitions. Where multiple unknown parent groups are assigned, there will be an additional partition for each. This allows us to account for non-zero means in the founders without centering the genetic values and aligns with the assumptions of the model as the mean of the founders' Mendelian sampling term is zero. However, this requires specific modification to the pedigree for `AlphaPart`to produce results without error. First, we will show what **not** to do, then we will show the correct approach and present the theory using one unknown parent group. For multiple unknown parent groups, see the section *Including multiple unknown parent groups*.
+
+Within the pedigree, we will assign one unknown parent group to all founding individuals. The nomenclature for unknown parent groups should be distinct to the other pedigree records, so here we will use the prefix "UPG" for unknown parent groups.
+
+```{r}
+ped$fid[ped$fid == 0] <- "UPG1"
+ped$mid[ped$mid == 0] <- "UPG1"
+
+ped
+```
+
+Then we will run AlphaPart as before.
+
+```{r}
+part <- AlphaPart(x = ped, colId = "id", colFid = "fid", colMid = "mid", colPath = "sex", colBV = "trait1")
+```
+
+This has produced an error since when recoding the pedigree, the `UPG1` is replaced with 0 as has no matching record in `ped$id`. To correctly include unknown parent groups, we need to add records for them in the pedigree with appropriate genetic values. Essentially including them as pseudo-individuals through the Quass-Pollak transformation (Quass and Pollak, 1981).
+
+Here, we will add a record for `UPG1` with a genetic value equal to the mean of the founders and allocate its own group for partitioning. Note in `ped$sex`, we assign `UPG1` to identify the path for the additional partition when including an unknown parent group. Additionally, we allocate `UPG1` to generation 0 (one generation before the founders).
+
+```{r}
+upg <- c("UPG1", 0, 0, "UPG1", 0, mean(ped$trait1[ped$fid=="UPG1" & ped$mid=="UPG1"]), NA)
+ped <- rbind(upg, ped)
+# Ensure correct data types
+ped$trait1 <- as.numeric(ped$trait1)
+ped
+```
+
+Now we can run AlphaPart as before. **Note** if a different nomenclature is used for unknown parent groups, such as "MF_1", "MF_2", etc., then an additional parameter `UPGname = "MF_"` should be included in the `AlphaPart()` function to specify the prefix for unknown parent groups. Otherwise the default is "UPG", hence it is not necessary to specify `UPGname` in this example.
+
+```{r}
+part <- AlphaPart(x = ped, colId = "id", colFid = "fid", colMid = "mid", colPath = "sex", colBV = "trait1")
+# Print dataframe of results
+part[["trait1"]]
+```
+
+Confirm that the Mendelian sampling terms of the founders have a mean of zero.
+
+```{r}
+print(paste0("Mean of founders' Mendelian sampling terms: ",
+             mean(part[["trait1"]]$trait1_ms[part[["trait1"]]$id %in% c(1,2,3,4)])))
+```
+
+Plot the results over generations
+
+```{r}
+# Summarise by generation for plotting
+partSum <- summary(part, by = "gen")
+plot(partSum, col = c("green", "red", "blue", "black"))
+```
+
+This plots differs to all previous for two reasons. First, we have an additional partition for the unknown parent group (`UPG1` in green). As there is only one unknown parent group for the whole pedigree, the `UPG1` path is horizontal, with a value of 11.5 in all generations (equivalent to UPG1's genetic value). Second, because of the inclusion of the unknown parent group in the pedigree in generation zero, the x-axis range from 0 to 3 rather than 1 to 3.
+
+When we only plot from 1 to 3, the female (red) and male (blue) partition trends match those observed when centering the genetic values. However the sum (black) line now represents the actual genetic trend rather than the centered genetic trend.
+
+```{r}
+partSum[["trait1"]] <- partSum[["trait1"]][partSum[["trait1"]]$gen !=0, ]
+plot(partSum, col = c("green", "red", "blue", "black"))
+```
+
+#### Theory of including one unknown parent group
+
+To understand how the partitioning works with unknown parent groups, read on.
+
+We will use $a_i$ to denote the breeding value of individual $i$, which is a sum of a parent average term ($0.5 (a_{f(i)} + a_{m(i)})$ with $f(i)$ the father and $m(i)$ the mother of individual $i$) and a Mendelian sampling term ($r_i$). The founders do not have known parents, but have been assigned an unknown parent group (`UPG1`) where the genetic value of the unknown parent group is equal to the mean genetic value of the descending founders. This allows for the mean of the Mendelian sampling term for the founders to be equal to 0 (per the assumption of the model). First, we will write the recursive equations for all individuals in the simple pedigree example (including `UPG1`):
+
+\begin{align*}
+a_{UPG1} & = 0 + r_{UPG1} \\
+a_1 & = \frac{1}{2} (a_{UPG1} + a_{UPG1}) + r_1 \\
+a_2 & = \frac{1}{2} (a_{UPG1} + a_{UPG1}) + r_2 \\
+a_3 & = \frac{1}{2} (a_{UPG1} + a_{UPG1}) + r_3 \\
+a_4 & = \frac{1}{2} (a_{UPG1} + a_{UPG1}) + r_4 \\
+a_5 & = \frac{1}{2} (a_2 + a_1) + r_5 \\
+a_6 & = \frac{1}{2} (a_4 + a_3) + r_6 \\
+a_7 & = \frac{1}{2} (a_6 + a_5) + r_7
+\end{align*}
+
+Now, we will substitute the equations recursively to express each breeding value as a sum of Mendelian sampling terms only:
+
+\begin{align*}
+a_{UPG1} & = 0 + r_{UPG1} \\
+a_1 & = \frac{1}{2} (r_{UPG1} + r_{UPG1}) + r_1 \\ 
+    & = r_{UPG1} + r_1 \\
+a_2 & = \frac{1}{2} (r_{UPG1} + r_{UPG1}) + r_2 \\
+    & = r_{UPG1} + r_2 \\
+a_3 & = \frac{1}{2} (r_{UPG1} + r_{UPG1}) + r_3 \\
+    & = r_{UPG1} + r_3 \\
+a_4 & = \frac{1}{2} (r_{UPG1} + r_{UPG1}) + r_4 \\ 
+    & = r_{UPG1} + r_4 \\
+a_5 & = \frac{1}{4}(r_{UPG1} + r_{UPG1} + r_{UPG1} + r_{UPG1}) + \frac{1}{2} (r_2 + r_1) + r_5 \\ 
+    & = r_{UPG1} + \frac{1}{2} r_2 + \frac{1}{2} r_1 + r_5 \\
+a_6 & = \frac{1}{4}(r_{UPG1} + r_{UPG1} + r_{UPG1} + r_{UPG1}) + \frac{1}{2} (r_4 + r_3) + r_6 \\
+    & = r_{UPG1} + \frac{1}{2} r_4 + \frac{1}{2} r_3 + r_6 \\
+a_7 & = \frac{1}{8}(r_{UPG1} + r_{UPG1} + r_{UPG1} + r_{UPG1} + r_{UPG1} + r_{UPG1} + r_{UPG1} + r_{UPG1}) + \frac{1}{4} (r_1 + r_2 + r_3 + r_4) + \frac{1}{2} (r_6 + r_5) + r_7 \\
+    & = r_{UPG1} + \frac{1}{4} r_1 + \frac{1}{4} r_2 + \frac{1}{4} r_3 + \frac{1}{4} r_4 + \frac{1}{2} r_6 + \frac{1}{2} r_5 + r_7
+\end{align*}
+
+If we now colour the Mendelian sampling terms according to their path (`UPG1`: green, `male`: blue, `female`: red):
+
+\begin{align*}
+a_{UPG1} & = 0 + \color{green}{r_{UPG1}} \\
+a_1 & = \color{green}{r_{UPG1}} + \color{blue}{r_1} \\
+a_2 & = \color{green}{r_{UPG1}} + \color{red}{r_2} \\
+a_3 & = \color{green}{r_{UPG1}} + \color{blue}{r_3} \\
+a_4 & = \color{green}{r_{UPG1}} + \color{red}{r_4} \\
+a_5 & = \color{green}{r_{UPG1}} + \color{red}{\frac{1}{2} r_2} + \color{blue}{\frac{1}{2} r_1} + \color{red}{r_5} \\
+a_6 & = \color{green}{r_{UPG1}} + \color{red}{\frac{1}{2} r_4} + \color{blue}{\frac{1}{2} r_3} + \color{blue}{r_6} \\
+a_7 & = \color{green}{r_{UPG1}} + \color{blue}{\frac{1}{4} r_1} + \color{red}{\frac{1}{4} r_2} + \color{blue}{\frac{1}{4} r_3} + \color{red}{\frac{1}{4} r_4} + \color{blue}{\frac{1}{2} r_6} + \color{red}{\frac{1}{2} r_5} + \color{blue}{r_7}
+\end{align*}
+
+Using Mendelian sampling terms from `part[["trait1"]]` we can calculate the partitions and show how they add up to the genetic values as follows:
+
+\begin{align*}
+a_{UPG1} & = 0 + \color{green}{11.25} = 11.25 \\
+a_1 & = \color{green}{11.25} + \color{blue}{-6.25} = 5.00 \\
+a_2 & = \color{green}{11.25} + \color{red}{-5.25} = 6.00 \\
+a_3 & = \color{green}{11.25} + \color{blue}{0.75} = 12.00 \\
+a_4 & = \color{green}{11.25} + \color{red}{10.75} = 22.00 \\
+a_5 & = \color{green}{11.25} + \color{red}{\frac{1}{2} -5.25} + \color{blue}{\frac{1}{2} -6.25} + \color{red}{3.50} \\
+    & = \color{green}{11.25} + \color{blue}{-3.125} + \colr{red}{0.875} = 9.00 \\
+a_6 & = \color{green}{11.25} + \color{red}{\frac{1}{2} 10.75} + \color{blue}{\frac{1}{2} 0.75} + \color{blue}{-5.00} \\
+    & = \color{green}{11.25} + \color{red}{5.375} + \color{blue}{-4.625} = 12.00 \\
+a_7 & = \color{green}{11.25} + \color{blue}{\frac{1}{4} -6.25} + \color{red}{\frac{1}{4} -5.25} + \color{blue}{\frac{1}{4} 0.75} + \color{red}{\frac{1}{4} 10.75} + \color{blue}{\frac{1}{2} -5.00} + \color{red}{\frac{1}{2} 3.50} + \color{blue}{4.50} \\
+    & = \color{green}{11.25} + \color{red}{3.125} + \color{blue}{0.625} = 15.00
+\end{align*}
+
+These match the results in the `part[["trait1"]]` dataframe, where `part[["trait1"]]$trait1_UPG1` corresponds to the \color{green}{green} term, `part[["trait1"]]$trait1_male` corresponds to the \color{blue}{blue} term, and `part[["trait1"]]$trait1_female` corresponds to the \color{red}{red} term.
+
+```{r}
+part[["trait1"]]
+```
+
+### Including multiple unknown parent groups
+
+For completeness, we will use the same example to demonstrate how to include two unknown parent groups. The assigned genetic values for each unknown parent group will be equal to the mean genetic value of their respective founders. In this case `UPG1`'s genetic value will be the mean of individuals 1 and 2, `UPG2`'s genetic value will be the mean of individuals 3 and 4. This is necessary so that the mean Mendelian sampling term of the founders are equal to zero. Note that each unknown parent group is assigned its own path in `ped$sex` for partitioning.
+
+```{r}
+ped <- ped[-1, ] # Remove previous UPG1 record
+ped$fid[ped$id %in% c(3,4)] <- "UPG2"
+ped$mid[ped$id %in% c(3,4)] <- "UPG2"
+upg1 <- c("UPG1", 0, 0, "UPG1", 0, mean(ped$trait1[ped$id %in% c(1,2)]), NA)
+upg2 <- c("UPG2", 0, 0, "UPG2", 0, mean(ped$trait1[ped$id %in% c(3,4)]), NA)
+ped <- rbind(upg1, upg2, ped)
+ped$trait1 <- as.numeric(ped$trait1)
+
+ped
+```
+
+Now we can run through AlphaPart
+
+```{r}
+part <- AlphaPart(x = ped, colId = "id", colFid = "fid", colMid = "mid", colPath = "sex", colBV = "trait1")
+# Print dataframe of results
+part[["trait1"]]
+```
+
+Confirm that the Mendelian sampling terms of the founders have a mean of zero.
+
+```{r}
+print(paste0("Mean of founders' Mendelian sampling terms: ",
+             mean(part[["trait1"]]$trait1_ms[part[["trait1"]]$id %in% c(1,2,3,4)])))
+```
+
+Plot the results over generations
+
+```{r}
+# Summarise by generation for plotting
+partSum <- summary(part, by = "gen")
+plot(partSum, col = c("green", "darkgreen", "red", "blue", "black"))
+```
+
+With this simple, well-balanced pedigree we observe two horizontal lines for both `UPG1` and `UPG2`. In all generations, both `UPG1` and `UPG2` have the same proportion of descendants (50:50), however `UPG2` has a higher genetic value of 17.0 compared to 5.5 for `UPG1`. Each unknown parent group path is equivalent to the proportion of descendants in each generation multiplied by the genetic value of the unknown parent group. Thus, `UPG1` has a contribution of 5.5x50%=2.75 and `UPG2` has a contribution of 17x50%=8.5 in all generations. If the proportions of descendants from each unknown parent group were different across generations, the contributions from each unknown parent group would differ across generations, thus the lines would not be horizontal.
+
+If we sum the contributions from `UPG1` and `UPG2`, the results are equivalent to using a single unknown parent group as shown previously. This is not true for all cases, but holds for this since the mean of the two unknown parent groups are equal to the mean of all the founders.
+
+```{r}
+partCombinedUPG <- partSum
+partCombinedUPG[["trait1"]]$`UPG1+2` <- partCombinedUPG[["trait1"]]$UPG1 + partCombinedUPG[["trait1"]]$UPG2
+partCombinedUPG[["trait1"]] <- partCombinedUPG[["trait1"]][partCombinedUPG[["trait1"]]$gen !=0, c(-2, -6, -7)]
+partCombinedUPG[["info"]]["nP"] <- 3
+plot(partCombinedUPG, col = c("green", "red", "blue", "black"))
+```
+#### Theory of including multiple unknown parent groups
+Aligning with the *Theory of including one unknown parent group*, this section presents the theory when including multiple unknown parent groups. The initial step is to write the recursive equations for all individuals in the simple pedigree example (including `UPG1` and `UPG2`), then substitute the equations recursively to express each breeding value as a sum of Mendelian sampling terms only. Finally, we colour the Mendelian sampling terms according to their path (`UPG1`: green, `UPG2`: dark green, `male`: blue, `female`: red) and show how they add up to the genetic values. As this is similar to the previous section, we will only present the steps for the final part, starting with colouring the Mendelian sampling terms according to their path (`UPG1`: green, `UPG2`: dark green, `male`: blue, `female`: red):
+
+\begin{align*}
+a_{UPG1} & = 0 + \color{darkgreen}{r_{UPG1}} \\
+a_{UPG2} &= 0 + \color{green}{r_{UPG2}} \\
+a_1 & = \color{darkgreen}{r_{UPG1}} + \color{blue}{r_1} \\
+a_2 & = \color{darkgreen}{r_{UPG1}} + \color{red}{r_2} \\
+a_3 & = \color{green}{r_{UPG2}} + \color{blue}{r_3} \\
+a_4 & = \color{green}{r_{UPG2}} + \color{red}{r_4} \\
+a_5 & = \color{darkgreen}{r_{UPG1}} + \color{red}{\frac{1}{2} r_2} + \color{blue}{\frac{1}{2} r_1} + \color{red}{r_5} \\
+a_6 & = \color{green}{r_{UPG2}} + \color{red}{\frac{1}{2} r_4} + \color{blue}{\frac{1}{2} r_3} + \color{blue}{r_6} \\
+a_7 & = \color{darkgreen}{\frac{1}{2} r_{UPG1}} + \color{green}{\frac{1}{2} r_{UPG2}} + \color{blue}{\frac{1}{4} r_1} + \color{red}{\frac{1}{4} r_2} + \color{blue}{\frac{1}{4} r_3} + \color{red}{\frac{1}{4} r_4} + \color{blue}{\frac{1}{2} r_6} + \color{red}{\frac{1}{2} r_5} + \color{blue}{r_7}
+\end{align*}
+
+Using Mendelian sampling terms from `part[["trait1"]]` we can calculate the partitions and show how they add up to the genetic values as follows:
+
+\begin{align*}
+a_{UPG1} & = 0 + \color{darkgreen}{5.5} = 5.5 \\
+a_{UPG2} & = 0 + \color{green}{17.0} = 17.0 \\
+a_1 & = \color{darkgreen}{5.5} + \color{blue}{-6.25} = 5.00 \\
+a_2 & = \color{darkgreen}{5.5} + \color{red}{-5.25} = 6.00 \\
+a_3 & = \color{green}{17.0} + \color{blue}{0.75} = 12.00 \\
+a_4 & = \color{green}{17.0} + \color{red}{10.75} = 22.00 \\
+a_5 & = \color{darkgreen}{5.5} + \color{red}{\frac{1}{2} -5.25} + \color{blue}{\frac{1}{2} -6.25} + \color{red}{3.50} \\
+    & = \color{darkgreen}{5.5} + \color{blue}{-3.125} + \colr{red}{0.875} = 9.00 \\
+a_6 & = \color{green}{17.0} + \color{red}{\frac{1}{2} 10.75} + \color{blue}{\frac{1}{2} 0.75} + \color{blue}{-5.00} \\
+    & = \color{green}{17.0} + \color{red}{5.375} + \color{blue}{-4.625} = 12.00 \\
+a_7 & = \color{darkgreen}{\frac{1}{2} 5.5} + \color{green}{\frac{1}{2} 17.0 + \color{blue}{\frac{1}{4} -6.25} + \color{red}{\frac{1}{4} -5.25} + \color{blue}{\frac{1}{4} 0.75} + \color{red}{\frac{1}{4} 10.75} + \color{blue}{\frac{1}{2} -5.00} + \color{red}{\frac{1}{2} 3.50} + \color{blue}{4.50} \\
+    & = \color{darkgreen}{2.75} + \color{green}{8.5} \color{red}{3.125} + \color{blue}{0.625} = 15.00
+\end{align*}
+
+These match the results in the `part[["trait1"]]` dataframe, where `part[["trait1"]]$trait1_UPG1` corresponds to the \color{darkgreen}{dark green} term, `part[["trait1"]]$trait1_UPG2` corresponds to the \color{green}{green} term, `part[["trait1"]]$trait1_male` corresponds to the \color{blue}{blue} term, and `part[["trait1"]]$trait1_female` corresponds to the \color{red}{red} term.
+
+```{r}
+part[["trait1"]]
+```
+
+
 
 ## References
 
-* TODO: Cite Ros' paper on partitioning with non-zero mean in founders and metafounders #42
-        https://github.com/AlphaGenes/AlphaPart/issues/42
+- Quass, R.L., and Pollak, E.J. (1981) Modified Equations for Sire Models with Groups. Journal of Dairy Science, 64(9):1868-1872. https://doi.org/10.3168/jds.S0022-0302(81)82778-6
+-   TODO: Cite Ros' paper on partitioning with non-zero mean in founders and metafounders #42 <https://github.com/AlphaGenes/AlphaPart/issues/42>

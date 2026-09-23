@@ -43,6 +43,9 @@
 #'   see arguments \code{colId}, \code{colFid}, \code{colMid},
 #'   \code{colPath}, and \code{colBV}; see also details about the
 #'   validity of pedigree.
+#' @param UPGname Character, a string pattern used to define the prefix 
+#' for identifying unknown parent groups. Default prefix is "UPG", 
+#' where unknown parent groups would be identified with "UPG1", "UPG2", etc.
 #' @param pathNA Logical, set dummy path (to "UNKNOWN") where path
 #'   information is unknown (missing).
 #' @param recode Logical, internally recode individual, father and,
@@ -153,6 +156,7 @@
 #' @export
 AlphaPart <- function(
   x,
+  UPGname = "UPG",
   pathNA = FALSE,
   recode = TRUE,
   unknown = NA,
@@ -260,27 +264,79 @@ AlphaPart <- function(
     x <- x[order(orderPed(ped = x[, c(colId, colFid, colMid)])), ]
   }
 
-  # TODO: Strip out all centering and scaling in favour of
-  #       the incoming metafounder / UPG code plans #22
-  #       https://github.com/AlphaGenes/AlphaPart/issues/22
-  # We should likely just remove all this code in the if (FALSE) block
-  if (FALSE) {
-    # Centering  to make founders has mean zero
-    controlvals <- getScale()
-    if (!missing(scaleEBV)) {
-      controlvals[names(scaleEBV)] <- scaleEBV
+## Test for presence of unknown parent groups, labeled "UPG"
+  test <- startsWith(as.character(x[,colId]), UPGname) | startsWith(as.character(x[,colFid]), UPGname) | startsWith(as.character(x[,colMid]), UPGname)
+  if (any(test, na.rm = TRUE)){
+    ## Test whether any individual does not have a UPG where all founders should
+    unknownSire <- x[is.na(x[,colFid]), colId] 
+    unknownDam <- x[is.na(x[,colMid]), colId]
+    unknownParents <- unique(c(unknownSire, unknownDam))
+    test <- unique(c(x[startsWith(as.character(x[,colId]), UPGname), colId], 
+    x[startsWith(as.character(x[,colFid]), UPGname), colFid],
+    x[startsWith(as.character(x[,colMid]), UPGname), colMid]))
+    founderTest <- test[!is.na(test)]
+    test <- unknownParents %in% founderTest
+    if (any(!test)){
+      stop(paste0("When using unknown parent groups, all pedigree founders must be assigned a UPG. \n The individual(s) ", unknownParents[!test],
+      " have either one or both parent unknown and were not flagged as an unknown parent group. \n Please review."))
     }
-    if (controlvals$center == TRUE | controlvals$scale == TRUE) {
-      x[, colBV] <- sGV(
-        y = x[, c(colId, colFid, colMid, colBV)],
-        center = controlvals$center,
-        scale = controlvals$scale,
-        recode = recode,
-        unknown = unknown
-      )
+    ## Test whether each unknown parent group in the pedigree has it's own record.
+    founderTest <- x[!startsWith(as.character(x[,colId]), UPGname) & (startsWith(as.character(x[,colFid]), UPGname) | startsWith(as.character(x[,colMid]), UPGname)), c(colFid, colMid)]
+    test <- apply(founderTest, 2, function(z) z %in% x[, colId])
+    if (!all(test)) {
+      stop("Each unknown parent group in the pedigree must have its own record. See vignette founders.Rmd")
     }
-  }
-
+    ## Test that each unknown parent group has no duplicated records
+    test <- duplicated(x[startsWith(as.character(x[,colId]), UPGname), colId]) 
+    if (any(test)) {
+      stop("Each unknown parent group in the pedigree must have only one record. See vignette founders.Rmd")
+    }
+    ## Test whether each unknown parent group record has unknown parents
+    test <- unlist(x[startsWith(as.character(x[,colId]), UPGname), c(colFid, colMid)]) %in% c(unknown, NA, 0, "")
+    if (!all(test)) {
+      stop("Each unknown parent group record must have unknown parents. See vignette founders.Rmd")
+    }
+    ## Test whether each unknown parent group has their own path defined
+    test <- x[startsWith(as.character(x[,colId]), UPGname), colId] %in% x[startsWith(as.character(x[,colPath]), UPGname), colPath]
+    if(!all(test)){
+      stop("Each unknown parent group in the pedigree must have its own path defined. See vignette founders.Rmd")
+    }
+    ## Test whether each unknown parent group has a genetic value defined
+    ## BV could be 0, so check no NAs only or no ""
+    test <- is.na(x[startsWith(as.character(x[,colId]), UPGname), colBV]) | x[startsWith(as.character(x[,colId]), UPGname), colBV] == ""
+    if (any(test)) {
+      stop("Each unknown parent group in the pedigree must have a genetic value defined. See vignette founders.Rmd")
+    }
+    ## Test whether each unknown parent group genetic value is equal (or close to) the mean of their founder genetic values
+    ## Gives a warning only.
+    UPG <- x[startsWith(as.character(x[,colId]), UPGname), colId]
+    for (m in UPG){
+      foundersBV <- sapply(colBV, function(col) 
+        {sum(x[x[,colId] != m & x[,colFid] == m | x[,colMid] == m, col], 
+             na.rm = TRUE)})
+      noFounders <- nrow(x[x[,colId] != m & x[,colFid] == m & x[,colMid] == m, ]) + 
+        0.5*nrow(x[x[,colId] != m & x[,colFid] == m & x[,colMid] != m, ]) + # to consider half-founders
+        0.5*nrow(x[x[,colId] != m & x[,colFid] != m & x[,colMid] == m, ])
+      test <- abs(x[x[, colId] == m, colBV] - foundersBV/noFounders) > 1e-6
+      if (any(test)) {
+        warning(paste("The genetic value for all unknown parent groups is expected to be equal to the mean genetic value of their grouped founders. \n", 
+                      m, " does not meet this expectation. See vignette founders.Rmd", sep = ""))
+      }
+    }
+  } else {
+    ## Test for if the mean of the founders and half-founders are zero
+    completefoundersGV <- x[x[,colFid] %in% c(unknown, NA, 0, "") & x[,colMid] %in% c(unknown, NA, 0, ""), colBV, drop = FALSE]
+    halffoundersGV <- x[(x[,colFid] %in% c(unknown, NA, 0, "") & !x[,colMid] %in% c(unknown, NA, 0, "")) | (!x[,colFid] %in% c(unknown, NA, 0, "") & x[,colMid] %in% c(unknown, NA, 0, "")), colBV, drop = FALSE]
+    allFoundersGV <- rbind(completefoundersGV, 0.5*halffoundersGV)
+    test <- colMeans(allFoundersGV, na.rm = TRUE)
+    if (any(abs(test) > 1e-1)) {
+      triggered_traits <- names(test)[abs(test) > 1e-1]
+      warning(paste0("The mean of the founders' genetic values is not zero for trait(s): ", 
+              triggered_traits, ". Consider centering or using unknown parent 
+              groups. If you have used unknown parent groups or metafounders, 
+              update `UPGname` with the prefix used. See vignette founders.Rmd for more."))
+    }
+  } 
   ## Recode all ids to 1:n
   if (recode) {
     y <- cbind(
@@ -448,7 +504,8 @@ AlphaPart <- function(
       nG = nG,
       ped = y,
       P = as.integer(P),
-      Px = as.integer(cumsum(c(0, rep(nP, nT - 1))))
+      Px = as.integer(cumsum(c(0, rep(nP, nT - 1)))),
+      g = as.integer(g)
     )
   }
 
@@ -522,4 +579,4 @@ AlphaPart <- function(
   } else {
     ret
   }
-}
+    }

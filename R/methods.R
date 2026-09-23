@@ -685,7 +685,7 @@ plot.summaryAlphaPart <-
         linetype = path,
         geom = "line"
       )
-      p <- p + geom_line(size = lineSize)
+      p <- p + geom_line(linewidth = lineSize)
       p <- p + xlab(label = ifelse(is.null(xlab), by, xlab))
       p <- p + ylab(label = ifelse(is.null(ylab), lT[i], ylab[i])) # lT[i] is the TRAIT!!!
       if (!is.null(xlim)) {

@@ -42,6 +42,16 @@ Please send us any additional references we should list here!
   providing a way to quantify selection response even when no unselected control
   is available.)
 
+* Quass and Pollak (1981) Modified Equations for Sire Models with Groups.
+  Journal of Dairy Science, 64(9):1868-1872. https://doi.org/10.3168/jds.S0022-0302(81)82778-6
+  (Original development of the genetic groups method to account for incomplete 
+  relationships from unknown dams in sire genetic evaluations.)
+  
+* Quass (1988) Additive Genetic Model with Groups and Relationships.
+  Journal of Dairy Science, 71(2):91-98. https://doi.org/10.1016/S0022-0302(88)79986-5
+  (Extended the genetic groups method to the animal (individual) model, 
+  demonstrating computationally efficient techniques.)
+
 * Sorensen and Kennedy (1984) Estimation of Response to Selection Using
   Least-Squares and Mixed Model Methodology.
   Journal of Animal Science, 58(5):1097–1106. https://doi.org/10.2527/jas1984.5851097x
@@ -61,8 +71,6 @@ Please send us any additional references we should list here!
   (Example for the full probabilistic analysis of the mean of breeding values over
   time with unknown parent (genetic) groups, recently also called metafounders.)
 
-* TODO: Add key references related to genetic groups, unknonwn parent groups, and metafounders #36
-        https://github.com/AlphaGenes/AlphaPart/issues/36
 
 ## Classic references related to the partitioning method
 

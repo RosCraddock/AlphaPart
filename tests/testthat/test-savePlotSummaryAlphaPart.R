@@ -10,7 +10,7 @@ test_that("Test savePlotSummary.AlphaPart", {
                      gen=c(  1,   1,   2,   2,   3,   3))
 
   ## Partition additive genetic values
-  m <- AlphaPart(x=ped, colBV=c("trt1", "trt2"), center = FALSE)
+  m <- AlphaPart(x=ped, colBV=c("trt1", "trt2"))
   sum <- summary(m, by="gen")
   p1 <- plot.summaryAlphaPart(sum)
   

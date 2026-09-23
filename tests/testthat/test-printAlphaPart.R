@@ -9,10 +9,10 @@ test_that("Test print.AlphaPart", {
                       trt1=c(100, 120, 115, 130, 125, 125),
                       trt2=c(100, 110, 105, 100,  85, 110),
                       gen=c(  1,   1,   2,   2,   3,   3))
-  tmp <- AlphaPart(x=ped, colBV=c("trt1", "trt2"), center = FALSE)
+  tmp <- AlphaPart(x=ped, colBV=c("trt1", "trt2"))
   ## Partition additive genetic values
-  expect_equal(print(tmp$trt1[,"trt1_w"], digits=1), c(100,120,5,130,2.5,125))
-  expect_equal(print.AlphaPart(AlphaPart(x=ped, colBV=c("trt1", "trt2"), center = FALSE)),NULL)
-  expect_equal(print.AlphaPart(AlphaPart(x=ped, colBV=c("trt1", "trt2"), center = TRUE)),NULL)
+  expect_equal(print(tmp$trt1[,"trt1_ms"], digits=1), c(100,120,5,130,2.5,125))
+  expect_equal(print.AlphaPart(AlphaPart(x=ped, colBV=c("trt1", "trt2"))),NULL)
+  expect_equal(print.AlphaPart(AlphaPart(x=ped, colBV=c("trt1", "trt2"))),NULL)
   expect_equal(print(tmp$info),tmp$info)
 })
