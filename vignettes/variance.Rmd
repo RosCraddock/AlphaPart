@@ -1,0 +1,217 @@
+---
+title: "AlphaPart: Partitioning genetic values and summarising their trend with mean and variance"
+author: "Thiago de Paula Oliveira and Gregor Gorjanc"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Variance}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.height = 10, fig.width = 10)
+```
+
+## Introduction
+
+Observed genetic change sover time in a population are a sum of the contributions of different groups of individuals. Here we show how to partition the genetic values, and their trend in mean and variance using `AlphaPart`, which implements the partitioning method described in García-Cortés et al. (2008).
+
+We emphasise that while changes in genetic mean (=mean of genetic values) are often the main interest, in many cases changes in genetic variance (=variance of genetic values) should also be considered. The latter is particularly important when selection is intense. How to achieve this was presented in Oliveira et al. (2023). Importantly, this work shows that a user could use any type of summary method to summarise the partitions.
+
+## Loading packages
+
+```{r, message=FALSE}
+# devtools::install_github("AlphaGenes/AlphaPart")
+library(AlphaPart)
+library(dplyr) # for data munging
+library(knitr) # for nice table displays (knitr::kable)
+library(ggplot2) # for plotting
+library(ggridges) # for plotting
+```
+
+## Loading datafile
+
+Here we load the example dataset `AlphaPartCattleSim.rds` included in the package. The dataset contains a simulated cattle population from Oliveira et al. (2023).
+
+```{r}
+data <- readRDS("./../inst/extdata/AlphaPartCattleSim.rds") %>%
+  dplyr::mutate(across(generation:mother, as.numeric)) %>%
+  dplyr::rename(status = type) %>%
+  dplyr::mutate(across(c("sex", "status"), as.factor)) %>%
+  dplyr::mutate(path = interaction(sex, status, sep = ":")) %>%
+  arrange(generation, ind) %>%
+  select(ind, father, mother, sex, status, path, generation, tbv, pheno) %>%
+  dplyr::mutate(generation = generation - 20) %>%
+  droplevels()
+
+# Data head
+head(data) %>%
+  knitr::kable(digits = 2)
+
+# Data size
+dim(data)
+```
+
+The dataset contains the following variables:
+
+  * ```ind``` - individual's ID
+  
+  * ```father``` and ```mother``` - individual's parents
+  
+  * ```sex``` - individual's sex
+  
+  * ```status``` - if the individual was or not selected
+  
+  * ```path``` - the path variable used for partitioning
+  
+  * ```tbv``` - individual's true breeding value
+  
+  * ```pheno``` - individual's phenotypic value
+
+## Partitioning
+
+We use the `AlphaPart` function to partition the true breeding values `(tbv)` by the `path` variable, which is a combination of individual's sex and status variable:
+
+```{r}
+table(data$path)
+```
+
+As shown above, males are grouped into selected and non-selected because some were used as fathers of next generations, but some were not. Femalee are on the other hand all in one group. While the group's name is "non-selected", they have all been used as mothers of next generations. Hence there was no selection among females, and we expect that female group will not contribute to change in genetic mean over generations.
+
+```{r}
+part <- AlphaPart(data, colId = "ind", colFid = "father", 
+                  colMid = "mother", colBV = "tbv", colPath = "path")
+head(part$tbv) %>%
+  knitr::kable(digits = 2)
+```
+
+We use the generic `summary` function to summarize an `AlphaPart` object by  generation. First, we look at the **changes in genetic mean** using `FUN = mean`:
+
+```{r}
+partMean <- summary(part, by = "generation", FUN = mean)
+
+head(partMean$tbv) %>%
+  knitr::kable(digits = 2)
+```
+
+Then, we look at the **changes in genetic variance** using `FUN = var`:
+
+```{r}
+partVar <- summary(part, by = "generation", FUN = var, cov = TRUE)
+
+head(partVar$tbv) %>%
+  knitr::kable(digits = 2)
+```
+
+The `cov = TRUE` argument computes covariances between the partitions, which are needed if we want to understand how the variances and covariances of the partitions add up to the total genetic variance.
+
+Instead of using `FUN = var`, we could use some other method to summarize the partitions, for example, the median as shown below. You should think what this summary means in the context of your data and analysis.
+
+```{r}
+partMed <- summary(part, by = "generation", FUN = median)
+
+head(partMed$tbv) %>%
+  knitr::kable(digits = 2)
+```
+
+## Plotting
+
+It is instructive to plot the distribution of breeding values and their partitions over generations. Since we had three paths, we will have three partitions.
+
+```{r}
+part$tbv %>%
+  ggplot(aes(y = as.factor(generation), `tbv_F:Non-Selected`)) +
+  geom_density_ridges(
+    aes(fill = "F - Non-Selected", linetype = "F - Non-Selected"),
+    alpha = .4, point_alpha = 1, rel_min_height = 0.01
+  ) +
+  geom_density_ridges(
+    aes(y = as.factor(generation), x = `tbv_M:Non-Selected`, fill = "M - Non-Selected",
+        linetype = "M - Non-Selected"),
+    alpha = .4, point_alpha = 1, rel_min_height = 0.01
+  ) +
+  geom_density_ridges(
+    aes(y = as.factor(generation), x = `tbv_M:Selected`, fill = "M - Selected",
+        linetype = "M - Selected"),
+    alpha = .4, point_alpha = 1, rel_min_height = 0.01
+  ) +
+  geom_density_ridges(
+    aes(y = as.factor(generation), x = `tbv`,
+        fill = "Sum", linetype = "Sum"),
+    alpha = .4, point_alpha = 1, rel_min_height = 0.01
+  ) +
+  ylab("Generation") +
+  xlab("Density plot of breeding values and their partitions") +
+  labs(fill = "Path:", linetype = "Path:") +
+  theme_bw(base_size = 20) +
+  theme(
+    legend.position = "top"
+  ) 
+```
+
+The above plot shows how the distribution of breeding values changed over generations (pink), and how the three partitions contributed to this change (red for "non-selected" females, green for non-selected males, and blue for selected males). The non-selected male distribution (green) is always centred around zero, indicating that they don't contribute to the genetic changes. The "non-selected" females (red) contribute positively to the genetic change, even though they are not selected, however, they contribute through propagating the genetic contributions of their selected fathers (e.g., Woolliams, et al. 1999).
+
+We can now summarise these distributions by their means, variances, and covariances. **The plot of means** below shows the overall positive change in genetic mean and a clear major contribution to this trend from the selected males, followed by the females and no contribution from the non-selected males:
+
+```{r}
+partMean$tbv %>%
+  ggplot(aes(y = Sum, x = generation, colour = "Sum")) +
+  scale_linetype_manual(
+    values = c("solid", "longdash", "dashed", "dotted"))+
+  geom_line() +
+  geom_line(aes(y = `F:Non-Selected`, x = generation, 
+                colour = "F"), alpha = 0.8) +
+  geom_line(aes(y = `M:Selected`, x = generation,
+                colour = "M(S)"), alpha = 0.8) +
+  geom_line(aes(y = `M:Non-Selected`, x = generation,
+                colour = "M(N)"), alpha = 0.8) +
+  geom_vline(xintercept = 0, linetype = 2, alpha = 0.3) +
+  ylab("Genetic mean") +
+  xlab("Generation") +
+  labs(colour = "Path:") +
+  theme_bw(base_size = 18) + 
+  theme(legend.position = "top")
+```
+
+**The plot of variances and covariances** shown below is more complex due to three lines for variances of the each partition and three lines for covariances between the partitions. The "sum" is the genetic variance (pink), which is decreasing over generations due to intense direction selection in the example (and no simulation of de-novo mutation!). This decrease is mainly driven by the small variance of the selected males partition (purple). The non-selected males partition has larger variance (blue) than the selected males partition. The female partition has the largest variance (orange), indicating that in this case females are a reservoir of genetic diversity. Note that the non-selected male partition has lower variance than the "non-selected" females because this partition of males does not contain the selected males partition. If we add up the two male partitions, their variance is expected to be similar to the variance of the female partition (because newborn males and females will each have about the same amount of genetic variance). Lastly, covariances between partitions are mostly hovering around zero in this example. When we estimate genetic values from the data, these covariances may be larger.
+
+```{r}
+partVar$tbv %>%
+  ggplot(aes(y = Sum, x = generation, colour = "Sum")) +
+  geom_line() +
+  geom_line(aes(y = `F:Non-Selected`, x = generation,
+            colour = "F"), alpha = 0.8) +
+  geom_line(aes(y = `F:Non-SelectedM:Selected`, x = generation,
+            colour = "F:M(S)"), linewidth = 0.5, alpha = 0.8) +
+  geom_line(aes(y = `F:Non-SelectedM:Non-Selected`, x = generation,
+            colour = "F:M(N)"), linewidth = 0.5, alpha = 0.6) +
+  geom_line(aes(y = `M:Non-SelectedM:Selected`, x = generation,
+            colour = "M(N):M(S)"), size = 0.5, alpha = 0.6) +
+  geom_line(aes(y = `M:Selected`, x = generation,
+            colour = "M(S)"), alpha = 0.8) +
+  geom_line(aes(y = `M:Non-Selected`, x = generation,
+            colour = "M(N)"), linewidth = 0.5, alpha = 0.8) +
+  geom_vline(xintercept = 0, linetype = 2, alpha = 0.3) +
+  ylab("Genetic (co)variance") +
+  xlab("Generation") +
+  labs(colour = "Path: ") +
+  theme_bw(base_size = 18) +
+  theme(
+    legend.position = "top"
+  )
+```
+
+## References
+
+* García-Cortés et al. (2008) Partition of the genetic trend to validate multiple
+  selection decisions.
+  Animal, 2(6):821-824. https://doi.org/10.1017/S175173110800205X
+
+* Oliveira et al. (2023) A method for partitioning trends in genetic mean and
+  variance to understand breeding practices.
+  Genetics Selection Evolution 55:36. https://doi.org/10.1186/s12711-023-00804-3
+
+* Woolliams et al. (1999) Expected Genetic Contributions and Their Impact on
+  Gene Flow and Genetic Gain.
+  Genetics, 153(2): 1009–1020. https://doi.org/10.1093/genetics/153.2.1009

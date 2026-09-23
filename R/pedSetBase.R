@@ -30,10 +30,6 @@
 #'
 #' @return Object \code{x} with removed rows for some individuals and their presence as parents.
 #' If \code{report=TRUE} progress is printed on the screen.
-#'
-#' @useDynLib AlphaPart, .registration = TRUE
-#' @importFrom Rcpp sourceCpp
-#'
 #' @export
 pedSetBase <- function (x, keep=NULL, unknown=NA, report=TRUE, colId=1, colFid=2,  colMid=3) {
 
@@ -64,6 +60,4 @@ pedSetBase <- function (x, keep=NULL, unknown=NA, report=TRUE, colId=1, colFid=2
   ## --- Return ---
 
   ret
-
-
 }

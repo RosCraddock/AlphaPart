@@ -1,0 +1,37 @@
+---
+title: "AlphaPart: Partitioning genotypes"
+author: "Jana Obšteter, Thiago de Paula Oliveira, Ros Craddock, and Gregor Gorjanc"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{genotypes}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+TODO: Create vignette that shows how to deal with genotypes #35
+      https://github.com/AlphaGenes/AlphaPart/issues/35
+
+## Introduction
+
+* TODO: Cite Ros' paper on partitioning with non-zero mean in founders and metafounders #42
+        https://github.com/AlphaGenes/AlphaPart/issues/42
+        (the paper with dog genotype work - just one locus)
+
+* TODO: Cite Jana's & Thiago's paper on partitioning with genomic information #43
+        https://github.com/AlphaGenes/AlphaPart/issues/43
+        (multiple loci)
+
+## References
+
+* TODO: Cite Ros' paper on partitioning with non-zero mean in founders and metafounders #42
+        https://github.com/AlphaGenes/AlphaPart/issues/42
+        (the paper with dog genotype work - just one locus)
+
+* TODO: Cite Jana's & Thiago's paper on partitioning with genomic information #43
+        https://github.com/AlphaGenes/AlphaPart/issues/43
+        (multiple loci)

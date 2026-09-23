@@ -81,4 +81,3 @@ Unknown or missing values (\code{NA} in \code{R}) can be represented in various 
 \author{
 Gregor Gorjanc
 }
-\keyword{internal}

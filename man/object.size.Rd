@@ -46,4 +46,3 @@ Provides an estimate of the memory that is being used to store \code{R} objects.
 \seealso{
 \code{\link[AlphaPart]{AlphaPart}}
 }
-\keyword{internal}

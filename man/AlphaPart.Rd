@@ -2,27 +2,38 @@
 % Please edit documentation in R/AlphaPart.R
 \name{AlphaPart}
 \alias{AlphaPart}
-\title{AlphaPart.R}
+\title{AlphaPart}
 \usage{
-AlphaPart(x, pathNA, recode, unknown, sort, verbose, profile,
-  printProfile, pedType, colId, colFid, colMid, colPath, colBV,
-  colBy, center, scaleEBV)
+AlphaPart(
+  x,
+  pathNA = FALSE,
+  recode = TRUE,
+  unknown = NA,
+  sort = TRUE,
+  verbose = 1,
+  pedType = "IPP",
+  colId = 1,
+  colFid = 2,
+  colMid = 3,
+  colPath = 4,
+  colBV = 5:ncol(x),
+  colBy = NULL
+)
 }
 \arguments{
-\item{x}{data.frame , with (at least) the following columns:
-individual, father, and mother identif ication, and year of birth;
+\item{x}{data.frame, with (at least) the following columns:
+individual, father, and mother identification, and year of birth;
 see arguments \code{colId}, \code{colFid}, \code{colMid},
 \code{colPath}, and \code{colBV}; see also details about the
 validity of pedigree.}
 
-\item{pathNA}{Logical, set dummy path (to "XXX") where path
+\item{pathNA}{Logical, set dummy path (to "UNKNOWN") where path
 information is unknown (missing).}
 
 \item{recode}{Logical, internally recode individual, father and,
 mother identification to \code{1:n} codes, while missing parents
-are defined with \code{0}; this option must be used if identif
-ications in \code{x} are not already given as \code{1:n} codes, see
-also argument \code{sort}.}
+are defined with \code{0}; this option must be used if identifications in
+\code{x} are not already given as \code{1:n} codes, see also \code{sort}.}
 
 \item{unknown}{Value(s) used for representing unknown (missing)
 parent in \code{x}; this options has an effect only when
@@ -37,11 +48,6 @@ restored.}
 \item{verbose}{Numeric, print additional information: \code{0} -
 print nothing, \code{1} - print some summaries about the data.}
 
-\item{profile}{Logical, collect timings and size of objects.}
-
-\item{printProfile}{Character, print profile info on the fly
-(\code{"fly"}) or at the end (\code{"end"}).}
-
 \item{pedType}{Character, pedigree type: the most common form is
 \code{"IPP"} for Individual, Parent 1 (say father), and Parent 2
 (say mother) data; the second form is \code{"IPG"} for Individual,
@@ -49,38 +55,23 @@ Parent 1 (say father), and one of Grandparents of Parent 2 (say
 maternal grandfather).}
 
 \item{colId}{Numeric or character, position or name of a column
-holding individual identif ication.}
+holding individual identification.}
 
 \item{colFid}{Numeric or character, position or name of a column
-holding father identif ication.}
+holding father identification.}
 
 \item{colMid}{Numeric or character, position or name of a column
-holding mother identif ication or maternal grandparent identif
+holding mother identification or maternal grandparent identif
 ication if \code{pedType="IPG"} .}
 
 \item{colPath}{Numeric or character, position or name of a column
 holding path information.}
 
 \item{colBV}{Numeric or character, position(s) or name(s) of
-column(s) holding breeding Values.}
+column(s) holding genetic Values.}
 
 \item{colBy}{Numeric or character, position or name of a column
 holding group information (see details).}
-
-\item{center}{Logical, if \code{center=TRUE} detect a shift in base
-population mean and attributes it as parent average effect rather
-than Mendelian sampling effect, otherwise, if center=FALSE, the base
-population values are only accounted as Mendelian sampling
-effect. Default is \code{center = TRUE}.}
-
-\item{scaleEBV}{a list with two arguments defining whether is
-appropriate to center and/or scale the \code{colBV} columns in respect to
-the base population. The list may contain the following components:
-\itemize{
-\item \code{center}: a logical value
-\item \code{scale}: a logical value. If \code{center = TRUE} and \code{scale = TRUE} then the
-base population is set to has zero mean and unit variance.
-}}
 }
 \value{
 An object of class \code{AlphaPart}, which can be used in
@@ -95,8 +86,8 @@ data.frame contains:
 \itemize{
 \item \code{x} columns from initial data \code{x}
 \item \code{trt_pa} parent average
-\item \code{trt_w}Mendelian sampling term
-\item \verb{trt_path1, trt_path2, ...} breeding value partitions
+\item \code{trt_ms} Mendelian sampling term
+\item \verb{trt_path1, trt_path2, ...} genetic value partitions
 }
 
 The last component of returned object is also a list named
@@ -114,16 +105,13 @@ about the analysis:
 If \code{colBy!=NULL} the resulting object is of a class
 \code{summaryAlphaPart}, see
 \code{\link[AlphaPart]{summary.AlphaPart}} for details.
-
-If \code{profile=TRUE}, profiling info is printed on screen to spot
-any computational bottlenecks.
 }
 \description{
-A function to partition breeding values by a path
+A function to partition genetic values by a path
 variable. The partition method is described in García-Cortés et
-al., 2008: Partition of the genetic trend to validate multiple
-selection decisions.  Animal : an international journal of animal
-bioscience. DOI:  \doi{10.1017/S175173110800205X}
+al. (2008): Partition of the genetic trend to validate multiple
+selection decisions. Animal: an international journal of animal
+bioscience. DOI: \doi{10.1017/S175173110800205X}
 }
 \details{
 Pedigree in \code{x} must be valid in a sense that there
@@ -136,14 +124,14 @@ identification is equal to the identification of a father or mother)
 any "code" that is different from existing identifications
 }
 
-Unknown (missing) values for breeding values are propagated down the
+Unknown (missing) values for genetic values are propagated down the
 pedigree to provide all available values from genetic
 evaluation. Another option is to cut pedigree links - set parents to
 unknown and remove them from pedigree prior to using this function -
-see \code{\link[AlphaPart]{pedSetBase}} function.  Warning is issued
+see \code{\link[AlphaPart]{pedSetBase}} function. Warning is issued
 in the case of unknown (missing) values.
 
-In animal breeding/genetics literature the model with the underlying
+In animal breeding literature the model with the underlying
 pedigree type \code{"IPP"} is often called animal model, while the
 model for pedigree type \code{"IPG"} is often called sire - maternal
 grandsire model. With a combination of \code{colFid} and
@@ -158,7 +146,7 @@ steps. However, only means can be obtained, while \code{summary}
 method gives more flexibility.
 }
 \examples{
-## Small pedigree with additive genetic (=breeding) values
+## Small pedigree with genetic values
 ped <- data.frame(  id=c(  1,   2,   3,   4,   5,   6),
                    fid=c(  0,   0,   2,   0,   4,   0),
                    mid=c(  0,   0,   1,   0,   3,   3),
@@ -167,7 +155,7 @@ ped <- data.frame(  id=c(  1,   2,   3,   4,   5,   6),
                   trt1=c(100, 120, 115, 130, 125, 125),
                   trt2=c(100, 110, 105, 100,  85, 110))
 
-## Partition additive genetic values
+## Partition genetic values
 tmp <- AlphaPart(x=ped, colBV=c("trt1", "trt2"))
 print(tmp)
 
@@ -176,7 +164,6 @@ summary(tmp, by="gen")
 
 ## Summarize by generation (genetic variance)
 summary(tmp, by="gen", FUN = var)
-
 
 \donttest{
 ## There are also two demos

@@ -112,4 +112,3 @@ create integer levelsMap (with internal codes) or character levelsMap (with leve
 \author{
 Gregor Gorjanc
 }
-\keyword{internal}

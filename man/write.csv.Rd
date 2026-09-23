@@ -5,7 +5,7 @@
 \alias{write.csv.default}
 \alias{write.csv.AlphaPart}
 \alias{write.csv.summaryAlphaPart}
-\title{write.csv.R}
+\title{Write Comma-Separated Values (CSV) file}
 \usage{
 write.csv(...)
 
@@ -16,18 +16,21 @@ write.csv(...)
 \method{write.csv}{summaryAlphaPart}(x, file, traitsAsDir = FALSE, csv2 = TRUE, row.names = FALSE, ...)
 }
 \arguments{
-\item{...}{Other options passed to \code{\link[utils]{write.csv2}} or \code{\link[utils]{write.csv}}.}
+\item{...}{other options passed to \code{\link[utils]{write.csv2}} or
+\code{\link[utils]{write.csv}}.}
 
-\item{x}{AlphaPart, object returned from \code{\link[AlphaPart]{AlphaPart}} function or
-summaryAlphaPart, object returned from \code{\link[AlphaPart]{summary.AlphaPart}} function.}
+\item{x}{AlphaPart or summaryAlphaPart, objects returned from
+\code{\link[AlphaPart]{AlphaPart}} or \code{\link[AlphaPart]{summary.AlphaPart}}}
 
-\item{file}{Character, file name with or without .csv extension, e.g., both "file" and "file.csv" are valid.}
+\item{file}{character, file name with or without .csv extension,
+that is, both \code{"file"} and \code{"file.csv"} are valid}
 
-\item{traitsAsDir}{Logical, should results be saved within trait folders;
-the construction is \code{file.path(dirname(file), trait, basename(file))};
+\item{traitsAsDir}{logical, should results be saved within trait folders;
+named as \code{file.path(dirname(file), trait, basename(file))};
 folders are created if they do not exist.}
 
-\item{csv2}{Logical, export using \code{\link[utils]{write.csv2}} or \code{\link[utils]{write.csv}}.}
+\item{csv2}{logical, export using \code{\link[utils]{write.csv2}} or
+\code{\link[utils]{write.csv}}.}
 
 \item{row.names}{Logical, export row names as well?}
 }
@@ -35,60 +38,61 @@ folders are created if they do not exist.}
 It contains:
 \itemize{
 \item \code{write.csv} - see \code{\link[utils]{write.csv}} for details.
-\item \code{write.csv.AlphaPart} - for each trait (list component in \code{x}) a file
-is saved on disk with name "AlphaPart_trait.csv", where the file will hold
-original data and breeding value partitions. With \code{traitsAsDir=TRUE}
-files are saved as "trait/file_trait.csv". File names are printed on screen
-during the process of export and at the end invisibly returned.
-\item \code{write.csv.summaryAlphaPart} - for each trait (list component in \code{x})
-a file partitions named "file_trait.csv" is saved on disk. With
-\code{traitsAsDir=TRUE} files are saved as "trait/file_trait_*.csv". File
-names are printed on screen during the process of export and at the end
+\item \code{write.csv.AlphaPart} - for each trait (list component in \code{x})
+a file is saved on disk with name \code{"AlphaPart_trait.csv"},
+where the file will hold original data and genetic value partitions.
+With \code{traitsAsDir=TRUE} files are saved as \code{"trait/file_trait.csv"}.
+File names are printed on screen during the process of export and at the end
+invisibly returned.
+\item \code{`write.csv.summaryAlphaPart`} - for each trait (list component in \code{x})
+a file partitions named \code{"file_trait.csv"} is saved on disk.
+With \code{traitsAsDir=TRUE} files are saved as \code{"trait/file_trait_*.csv".}
+File names are printed on screen during the process of export and at the end
 invisibly returned.
 }
 }
 \description{
-Save summaries of partitioned breeding values to CSV files on disk for further
+Save summaries of partitioned genetic values to CSV files on disk for further
 analyses of processing with other software or just for saving (backing up)
 results.
-}
-\details{
+
 Function \code{\link[utils]{write.csv}} from the \pkg{utils} package works
-when exported object is a \code{\link[base]{data.frame}} or a
+when the object is a \code{\link[base]{data.frame}} or a
 \code{\link[base]{matrix}}. This is an attempt to make this function generic
 so that one can define \code{write.csv} methods for other objects.
 }
 \section{Methods (by class)}{
 \itemize{
-\item \code{default}: Default \code{write.csv} method.
+\item \code{write.csv(default)}: Default \code{write.csv} method.
 
-\item \code{AlphaPart}: Save partitioned breeding values to CSV files on disk on disk for further
-analyses or processing with other software or just for saving (backing up)
+\item \code{write.csv(AlphaPart)}: Save partitioned genetic values to CSV files on disk on disk
 results.
 
-\item \code{summaryAlphaPart}: Save summaries of partitioned breeding values to CSV files on disk for further
-analyses of processing with other software or just for saving (backing up)
-results.
+\item \code{write.csv(summaryAlphaPart)}: Save summaries of partitioned genetic values to CSV files on disk
+
 }}
-
 \examples{
-## Partition additive genetic values
-res <- AlphaPart(x=AlphaPart.ped, colPath="country", colBV=c("bv1", "bv2"))
+# Partition genetic values
+data(AlphaPart.ped)
+res <- AlphaPart(
+  x = AlphaPart.ped,
+  colPath = "country",
+  colBV = c("trait1", "trait2")
+)
 
-## Write summary on the disk and collect saved file names
+# Write summary on the disk and collect saved file names
 fileName <- file.path(tempdir(), "AlphaPart")
-ret <- write.csv(x=res, file=fileName)
+ret <- write.csv(x = res, file = fileName)
 print(ret)
 file.show(ret[1])
 
-## Clean up
-files <- dir(path=tempdir(), pattern="AlphaPart*")
-unlink(x=files)
-
+# Clean up
+files <- dir(path = tempdir(), pattern = "AlphaPart*")
+unlink(x = files)
 }
 \seealso{
-\code{\link[utils]{write.csv}} help page on the default \code{write.csv} and \code{write.csv2}
-methods in the \pkg{utils} package;
+\code{\link[utils]{write.csv}} help page on the default \code{write.csv}
+and \code{write.csv2} methods in the \pkg{utils} package;
 \code{\link[AlphaPart]{summary.AlphaPart}} and \code{\link[AlphaPart]{AlphaPart}}
-help pages on the objects of \code{summaryAlphaPart} and \code{AlphaPart} classes.
+help pages on \code{summaryAlphaPart} and \code{AlphaPart} classes.
 }

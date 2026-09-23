@@ -42,20 +42,10 @@
 #' @return Object \code{x} with imputed birth years based on the birth year of children or parents.
 #' If \code{report=TRUE} success is printed on the screen as the number of initially, fixed,
 #' and left unknown birth years is printed.
-#'
-#' @useDynLib AlphaPart, .registration = TRUE
-#' @importFrom Rcpp sourceCpp
-#'
 #' @export
-#' @importFrom pedigree orderPed
-
 pedFixBirthYear <- function (x, interval, down=FALSE, na.rm=TRUE, sort=TRUE, direct=TRUE,
   report=TRUE, colId=1, colFid=2, colMid=3, colBY=4) {
 
-
-
-  ## TODO: Profile function with Rprof() - done one round of optimization - can it be done better? 
-  ##
   ## TODO: Can we add another loop (say via argument automatic=TRUE) to repeatedly call this function?
   ##       The idea is to start say with down=FALSE then in next run with down=TRUE and so on. 
   ##       Would have to check if there is no progress between iterations to avoid infinite loop.
@@ -164,9 +154,6 @@ pedFixBirthYear <- function (x, interval, down=FALSE, na.rm=TRUE, sort=TRUE, dir
     cat(" - left:",      nM - k, "\n")
   }
   if (sort) x <- x[ordOrig, ]
-  x
-
-
-
+  return(x)
 }
 

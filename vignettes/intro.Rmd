@@ -1,0 +1,301 @@
+---
+title: "Introduction to AlphaPart"
+author: "Gregor Gorjanc, Jana Obsteter, and Thiago de Paula Oliveira"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+`AlphaPart` implements the method for partitioning genetic values from García-Cortés et al. (2008). This method enables a retrospective genetic analysis of past changes in a population and is as such a counterpart to prospective genetic methods describing genetic change (Lush, 1943; Lande, 1979; Price, 1970, 1972). Genetic values can be breeding values, allele dosages, or similar quantities. The example below shows the application and theory of the partitioning method.
+
+See also the `AlphaPart` publication for details (Obšteter et al., 2021). Additional vignettes show additional usage of the package:
+
+  * partitioning of genetic variance and other functions of genetic values - see [variance](variance.html) or `vignette("variance", package = "AlphaPart")` (Oliveira et al., 2024),
+
+  * handling non-zero mean and structure in the founding population  - see [founders](founders.html) or `vignette("founders", package = "AlphaPart")` (Craddock et al., 2026),
+
+  * partitioning with uncertainty of estimates - see [samples](samples.html) or `vignette("samples", package = "AlphaPart")` (Škorput et al., 2015; Oliveira et al., 2024; Lopez-Carbonell et al., 2024),
+
+  * partitioning genotypes - see [genotypes](genotypes.html) or `vignette("genotypes", package = "AlphaPart")` (Craddock et al., 2026; Obšteter et al., 2026), and
+
+  * partitioning with identity-by-descent information - see [ibd](ibd.html) or `vignette("ibd", package = "AlphaPart")` (Craddock et al., 2026).
+
+References on the theoretical and applied work in this domain are briefly summarised
+in [References](references.html).
+
+## Installation
+
+We install and load the package with:
+
+```{r}
+# install.packages("AlphaPart") # uncomment if not installed
+library("AlphaPart")
+```
+
+## Partitioning
+
+To demonstrate the partitioning method we use the example dataset `AlphaPart.ped` included in the package:
+
+```{r}
+data(AlphaPart.ped)
+print(AlphaPart.ped)
+```
+
+This `data.frame` has information on 8 individuals with these columns:
+
+  * `id`: individual's ID,
+  
+  * `father`: Father's ID,
+  
+  * `mother`: Mother's ID,
+  
+  * `generation`: Generation,
+  
+  * `country`: Country,
+  
+  * `sex`: Individual's sex,
+  
+  * `trait1`: Breeding value for trait 1, and
+  
+  * `trait2`: Breeding value for trait 2.
+
+If we would like to partition breeding values for the first trait by country to analyse domestic and import contributions, we would run:
+
+```{r}
+part <- AlphaPart(x = AlphaPart.ped,
+                  colPath = "country",
+                  colBV = "trait1")
+```
+
+Inspection of the output object shown below reveals that we computed parent average and Mendelian sampling terms for each individual and then attributed the Mendelian sampling terms to the paths defined by the country variable. As an exercise, you can partition by sex.
+
+```{r}
+head(part$trait1)
+```
+
+## Theory
+
+If you are eager to summarise the above output, jump to the next section. However, if you want to understand how the partitioning works, read on.
+
+We will use $a_i$ to denote the breeding value of individual $i$, which is a sum of a parent average term ($0.5 (a_{f(i)} + a_{m(i)})$ with $f(i)$ the father and $m(i)$ the mother of individual $i$) and a Mendelian sampling term ($r_i$). The founders don't have known parents, so their parent average is $0$ and whole breeding value is assigned to the Mendelian sampling term, while for half-founder we know half of the parentage average. First, we will write the recursive equations for all individuals in the dataset:
+
+\begin{align*}
+a_A & = 0 + r_A \\
+a_B & = 0 + r_B \\
+a_C & = \frac{1}{2} (a_B + a_A) + r_C \\
+a_T & = \frac{1}{2} a_B + r_T \\
+a_D & = 0 + r_D \\
+a_E & = \frac{1}{2} (a_D + a_C) + r_E \\
+a_U & = \frac{1}{2} a_D + r_U \\
+a_V & = \frac{1}{2} a_E + r_V
+\end{align*}
+
+Now, we will substitute the equations recursively to express each breeding value as a sum of Mendelian sampling terms only:
+
+\begin{align*}
+a_A & = 0 + r_A \\
+a_B & = 0 + r_B \\
+a_C & = \frac{1}{2} r_B + \frac{1}{2} r_A + r_C \\
+a_T & = \frac{1}{2} r_B + r_T \\
+a_D & = 0 + r_D \\
+a_E & = \frac{1}{2} r_D + \frac{1}{2}\left(\frac{1}{2} r_B + \frac{1}{2} r_A + r_C\right) + r_E \\
+    & = \frac{1}{2} r_D + \frac{1}{4} r_B + \frac{1}{4} r_A + \frac{1}{2} r_C + r_E \\
+a_U & = \frac{1}{2} r_D + r_U \\
+a_V & = \frac{1}{2}\left(\frac{1}{2} r_D + \frac{1}{4} r_B + \frac{1}{4} r_A + \frac{1}{2} r_C + r_E\right) + r_V \\
+    & = \frac{1}{4} r_D + \frac{1}{8} r_B + \frac{1}{8} r_A + \frac{1}{4} r_C + \frac{1}{2} r_E + r_V
+\end{align*}
+
+You can check these equations against the following code:
+
+```{r}
+# install.packages("pedigreeTools")
+if (require(pedigreeTools)) {
+  ped <- AlphaPart.ped[, c("id", "father", "mother")]
+  ped$father[ped$father == ""] <- NA
+  ped$mother[ped$mother == ""] <- NA
+  ped[] <- lapply(ped, as.character)
+  ped <- pedigree(label = ped$id,
+                  sire = ped$father,
+                  dam = ped$mother)
+  getT(ped)
+}
+```
+
+If we now paint the Mendelian sampling terms according to the country of origin (paths) such that domestic is blue and import is red, we get:
+
+\begin{align*}
+a_A & = 0 + \color{blue}{r_A} \\
+a_B & = 0 + \color{red}{r_B} \\
+a_C & = \color{red}{\frac{1}{2} r_B} +
+        \color{blue}{\frac{1}{2} r_A} +
+        \color{blue}{r_C} \\
+a_T & = \color{red}{\frac{1}{2} r_B} +
+        \color{red}{r_T} \\
+a_D & = 0 + \color{red}{r_D} \\
+a_E & = \color{red}{\frac{1}{2} r_D} +
+        \color{red}{\frac{1}{4} r_B} + 
+        \color{blue}{\frac{1}{4} r_A} +
+        \color{blue}{\frac{1}{2} r_C} +
+        \color{blue}{r_E} \\
+a_U & = \color{red}{\frac{1}{2} r_D} +
+        \color{red}{r_U} \\
+a_V & = \color{red}{\frac{1}{4} r_D} +
+        \color{red}{\frac{1}{8} r_B} +
+        \color{blue}{\frac{1}{8} r_A} +
+        \color{blue}{\frac{1}{4} r_C} +
+        \color{blue}{\frac{1}{2} r_E} +
+        \color{blue}{r_V}
+\end{align*}
+
+Using Mendelian sampling terms from `part$trait1` we can calculate the partitions and show how they add up to the breeding values as follows:
+
+\begin{align*}
+a_A & = 0 + \color{blue}{r_A} \\
+    & = \color{blue}{100} = 100 \\
+a_B & = 0 + \color{red}{r_B} \\
+    & = \color{red}{105} = 105 \\
+a_C & = \color{red}{\frac{1}{2} r_B} +
+        \color{blue}{\frac{1}{2} r_A} +
+        \color{blue}{r_C} \\
+    & = \color{red}{\frac{1}{2} 105} +
+        \color{blue}{\frac{1}{2} 100} +
+        \color{blue}{1.5} \\
+    & = \color{red}{52.5} + \color{blue}{50 + 1.5} \\
+    & = \color{red}{52.5} + \color{blue}{51.5} = 104 \\
+a_T & = \color{red}{\frac{1}{2} r_B} +
+        \color{red}{r_T} \\
+    & = \color{red}{\frac{1}{2} 105} +
+        \color{red}{49.5} \\
+    & = \color{red}{52.5 + 49.5} \\
+    & = \color{red}{102} = 102 \\
+a_D & = 0 + \color{red}{r_D} \\
+    & = \color{red}{108} = 108 \\
+a_E & = \color{red}{\frac{1}{2} r_D} +
+        \color{red}{\frac{1}{4} r_B} + 
+        \color{blue}{\frac{1}{4} r_A} +
+        \color{blue}{\frac{1}{2} r_C} +
+        \color{blue}{r_E} \\
+    & = \color{red}{\frac{1}{2} 108} +
+        \color{red}{\frac{1}{4} 105} +
+        \color{blue}{\frac{1}{4} 100} +
+        \color{blue}{\frac{1}{2} 1.5} +
+        \color{blue}{1.0} \\
+    & = \color{red}{54 + 26.25} + \color{blue}{25 + 0.75 + 1} \\
+    & = \color{red}{80.25} + \color{blue}{26.75} = 107 \\
+a_U & = \color{red}{\frac{1}{2} r_D} +
+        \color{red}{r_U} \\
+    & = \color{red}{\frac{1}{2} 108} +
+        \color{red}{53.0} \\
+    & = \color{red}{54 + 53} \\
+    & = \color{red}{107} = 107 \\
+a_V & = \color{red}{\frac{1}{4} r_D} +
+        \color{red}{\frac{1}{8} r_B} +
+        \color{blue}{\frac{1}{8} r_A} +
+        \color{blue}{\frac{1}{4} r_C} +
+        \color{blue}{\frac{1}{2} r_E} +
+        \color{blue}{r_V} \\
+    & = \color{red}{\frac{1}{4} 108} +
+        \color{red}{\frac{1}{8} 105} +
+        \color{blue}{\frac{1}{8} 100} +
+        \color{blue}{\frac{1}{4} 1.5} +
+        \color{blue}{\frac{1}{2} 1.0} +
+        \color{blue}{55.5} \\
+    & = \color{red}{27 + 13.125} + \color{blue}{12.5 + 0.375 + 0.5 + 55.5} \\
+    & = \color{red}{40.125} + \color{blue}{68.875} = 109
+\end{align*}
+
+Note that this example has a very incomplete pedigree, which we would handle
+with unknown parent groups / metafounders in the estimation of genetic values
+as well as in the partitioning. See the [founders](founders.html) vignette on
+this topic.
+
+## Summarising
+
+While the example dataset is small, in real applications pedigrees can be huge. To summarize the results we can use the `summary` function and with the argument `by` we can specify a grouping variable:
+
+```{r}
+sumPartByGeneration <- summary(part, by = "generation")
+print(sumPartByGeneration)
+```
+
+The above results show average breeding value by generation and how this splits into domestic and import contributions. For example, in generation 3 the average is 107 of which ~14 is attributed to domestic and ~94 to import contribution.
+
+By default, `summary` uses the mean function, but you can specify any R function via the `FUN` argument (see the [Variance](variance.html) vignette on this aspect). You can also summarize only a subset of the object via the `subset` argument.
+
+## Plotting
+
+You can plot results from the `summary` function with the `plot` function:
+
+```{r}
+plot(sumPartByGeneration)
+```
+
+This plot is not very illuminating because of the small dataset. There is a more interesting example in the [Variance](variance.html) vignette!
+
+## Other
+
+You can partition multiple traits by specifying a vector of variables, say `colBV = c("trait1", "trait2")`. This multiple trait option can also serve to partition samples from a posterior distribution to quantify uncertainty - see the [samples](samples.html) vignette.
+
+There is a number of utility functions that ease partitioning analysis. With the `pedFixBirthYear` function you can impute missing or fix erroneous years of birth. With the `pedSetBase` function you can set the base population by specifying founders and removing older pedigree records. With the `AlphaPartSubset` function you keep partitions for specified paths in the `AlphaPart` or `summaryAlphaPart` objects. With the `AlphaPartSum` function you sum the partitions of several paths in a `summaryAlphaPart` object. The `AlphaPartSubset` and `AlphaPartSum` functions simplify the presentation of partitioning analysis.
+
+To speed-up calculations we use C++ and trait-vectorised partitioning. The `AlphaPart` function can also directly partition and summarize path contributions “on-the-fly”, which is a useful computational speed-up for huge pedigrees.
+
+## References
+
+* García-Cortés et al. (2008) Partition of the genetic trend to validate multiple
+  selection decisions.
+  Animal, 2(6):821-824. https://doi.org/10.1017/S175173110800205X
+
+* Lande (1979) Quantitative genetic analysis of multivariate evolution, applied
+  to brain:body size allometry.
+  Evolution, 33(1):402–416. https://doi.org/10.2307/2407630
+
+* Lush (1943) Animal Breeding Plans.
+  Iowa State College Press, Ames, Iowa.
+  https://archive.org/details/in.ernet.dli.2015.207427
+  
+* Lopez-Carbonell et al. (2024) Multiple Trait Bayesian Analysis of Partitioned
+  Genetic Trends Accounting for Uncertainty in Genetic Parameters. An Example With
+  the Pirenaica and Rubia Gallega Beef Cattle Breeds.
+  Journal of Animal Breeding and Genetics, 142:454-462. https://doi.org/10.1111/jbg.12918
+
+* Obšteter et al. (2021) AlphaPart — R implementation of the method for partitioning
+  genetic trends.
+  Genetics Selection Evolution, 53:30. https://doi.org/10.1186/s12711-021-00600-x
+
+* TODO: Cite Jana's Obsteter & Thiago's paper on partitioning with genomic information #43
+        https://github.com/AlphaGenes/AlphaPart/issues/43
+
+* Oliveira et al. (2023) A method for partitioning trends in genetic mean and
+  variance to understand breeding practices.
+  Genetics Selection Evolution 55:36. https://doi.org/10.1186/s12711-023-00804-3
+
+* Price (1970) Selection and Covariance.
+  Nature 227, 520–521. https://doi.org/10.1038/227520a0
+
+* Price (1972) Fisher's ‘fundamental theorem’ made clear.
+  Annals of Human Genetics, 36:129-140. https://doi.org/10.1111/j.1469-1809.1972.tb00764.x
+
+* Škorput et al. (2015) Partition of genetic trends by origin in Landrace and
+  Large-White pigs.
+  Animal, 9(10):1605-1609. https://doi.org/10.1017/S1751731115001056
+
+* TODO: Cite Ros' Craddock paper on partitioning with non-zero mean in founders and metafounders #42
+        https://github.com/AlphaGenes/AlphaPart/issues/42
+        (this also touches on using genomic data, but for one locus)
+
+* TODO: Cite Jana's & Thiago's paper on partitioning with genomic information #43
+        https://github.com/AlphaGenes/AlphaPart/issues/43
+        (multiple loci)
+
+* TODO: Cite Ros's Craddock paper on partitioning with IBD information #44
+        https://github.com/AlphaGenes/AlphaPart/issues/44

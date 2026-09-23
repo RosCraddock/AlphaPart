@@ -1,6 +1,8 @@
+^\.github$
 ^.*\.Rproj$
 ^\.Rproj\.user$
-^codecov\.yml$
+^\.travis.yml$
 ^_pkgdown\.yml$
-^docs$
+^appveyor\.yml$
+^codecov\.yml$
 ^pkgdown$

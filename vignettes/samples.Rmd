@@ -1,0 +1,40 @@
+---
+title: "AlphaPart: Accounting for uncertainty of estimated genetic values in partitioning"
+author: "Thiago de Paula Oliveira and Gregor Gorjanc"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{samples}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+TODO: Create vignette that shows how to deal with GV samples #34
+      https://github.com/AlphaGenes/AlphaPart/issues/34
+
+## Introduction
+
+Škorput et al. (2018) was the first
+
+Oliveira et al. (2023) did more - mean and variance
+
+Lopez-Carbonell et al. (2024) did this also
+
+## References
+
+* Lopez-Carbonell et al. (2024) Multiple Trait Bayesian Analysis of Partitioned
+  Genetic Trends Accounting for Uncertainty in Genetic Parameters. An Example With
+  the Pirenaica and Rubia Gallega Beef Cattle Breeds.
+  Journal of Animal Breeding and Genetics, 142:454-462. https://doi.org/10.1111/jbg.12918
+
+* Oliveira et al. (2023) A method for partitioning trends in genetic mean and
+  variance to understand breeding practices.
+  Genetics Selection Evolution 55:36. https://doi.org/10.1186/s12711-023-00804-3
+
+* Škorput et al. (2018) Partition of genetic trend for daily gain by sex in
+  Landrace, Large White, Pietrain, and Duroc pigs.
+  Journal of Central European Agriculture, 19(3):648-657. https://doi.org/10.5513/JCEA01/19.3.2130

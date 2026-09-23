@@ -1,0 +1,38 @@
+bibentry(
+  bibtype  = "Article",
+  title    = "Partition of the genetic trend to validate multiple
+  selection decisions",
+  author   = "García-Cortés, L. A. and Martínez-Ávila, J. C., and Toro, M. A.",
+  journal  = "Animal",
+  year     = "2008",
+  volume   = "2",
+  number   = "6",
+  pages    = "821--824",
+  url      = "https://doi.org/10.1017/S175173110800205X",
+  notes    = "The original publication of the partitioning method"
+)
+
+bibentry(
+  bibtype  = "Article",
+  title    = "AlphaPart — R implementation of the method for partitioning genetic trends",
+  author   = "Obšteter, J. and Holl, J. and Hickey, J. M. and Gorjanc, G.",
+  journal  = "Genetics Selection Evolution",
+  year     = "2021",
+  volume   = "53",
+  number   = "30",
+  url      = "https://doi.org/10.1186/s12711-021-00600-x",
+  notes    = "R implementation of the partitioning method with a two-stage selection example"
+)
+
+bibentry(
+  bibtype  = "Article",
+  title    = "A method for partitioning trends in genetic mean and
+  variance to understand breeding practices",
+  author   = "Oliveira, T. P. and Obšteter, J. and Pocrnic, I. and Heslot, N. and Gorjanc, G.",
+  journal  = "Genetics Selection Evolution",
+  year     = "2023",
+  volume   = "55",
+  number   = "36",
+  url      = "https://doi.org/10.1186/s12711-023-00804-3",
+  notes    = "Extends the partitioning method to use any function in addition to the mean, say variance. Provided implementation in the AlphaPart R package"
+)

@@ -1,0 +1,26 @@
+---
+title: "AlphaPart: Partitioning with idenity-by-descent (IBD) information"
+author: "Ros Craddock and Gregor Gorjanc"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{IBD}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+TODO: Implement gametic/IBD/phased-based partitioning #18
+      https://github.com/AlphaGenes/AlphaPart/issues/18
+      
+## Introduction
+
+* TODO: Cite Ros's paper on partitioning with IBD information #44
+        https://github.com/AlphaGenes/AlphaPart/issues/44
+
+## References
+
+* TODO: Cite Ros's paper on partitioning with IBD information #44
+        https://github.com/AlphaGenes/AlphaPart/issues/44

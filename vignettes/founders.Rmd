@@ -1,0 +1,27 @@
+---
+title: "AlphaPart: Accounting for non-zero mean and structure in founders"
+author: "Ros Craddock and Gregor Gorjanc"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Founders}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+TODO: Double check AlphaPart and genetic groups #7
+      https://github.com/AlphaGenes/AlphaPart/issues/7
+
+## Introduction
+
+* TODO: Cite Ros' paper on partitioning with non-zero mean in founders and metafounders #42
+        https://github.com/AlphaGenes/AlphaPart/issues/42
+
+## References
+
+* TODO: Cite Ros' paper on partitioning with non-zero mean in founders and metafounders #42
+        https://github.com/AlphaGenes/AlphaPart/issues/42

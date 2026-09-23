@@ -1,127 +1,127 @@
 
-<!-- README.md is generated from README.Rmd. Please edit that file -->
-
 # AlphaPart <img src="man/figures/logo.png" align="right" height = 150/>
 
-| Package                                                                                                                                | Status                                                                                                                                                           | Coverage                                                                                                                                                   | GitHub                                                                                                                                                                     | Miscellaneous                                                                                                                                                |
-|----------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/AlphaPart)](https://cran.r-project.org/package=AlphaPart)                    | [![Development](https://img.shields.io/badge/development-active-blue.svg)](https://img.shields.io/badge/development-active-blue.svg)                             | [![codecov](https://codecov.io/gh/AlphaGenes/AlphaPart/branch/version-0.8.2/graph/badge.svg?token=WS7YGNSOVL)](https://codecov.io/gh/AlphaGenes/AlphaPart) | [![GitHub version](https://img.shields.io/badge/GitHub-0.6.8.9000-orange.svg?style=flat-square)](https://github.com/AlphaGenes/AlphaPart/)                                 | [![downloads](https://cranlogs.r-pkg.org/badges/AlphaPart)](https://cranlogs.r-pkg.org/badges/AlphaPart) <!-- line break 1 -->                               |
-| [![CRAN Checks](https://cranchecks.info/badges/summary/AlphaPart)](https://cran.r-project.org/web/checks/check_results_AlphaPart.html) | [![R build status](https://github.com/AlphaGenes/AlphaPart/workflows/R-CMD-check/badge.svg)](https://github.com/AlphaGenes/AlphaPart/)                           | [![lints](https://github.com//AlphaGenes/AlphaPart/workflows/lint/badge.svg)](https://github.com/AlphaGenes/AlphaPart/)                                    | [![Forks](https://img.shields.io/badge/forks-NA-blue.svg)](https://github.com/AlphaGenes/AlphaPart/)                                                                       | [![total downloads](https://cranlogs.r-pkg.org/badges/grand-total/AlphaPart)](https://cranlogs.r-pkg.org/badges/grand-total/AlphaPart) <!-- line break 2 --> |
-| [![minimal R version](https://img.shields.io/badge/R%3E%3D-3.5.0-6666ff.svg)](https://cran.r-project.org/)                             | [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/9gjgy9ff2i15fa4q?svg=true)](https://ci.appveyor.com/project/Prof-ThiagoOliveira/alphapart) | **Code Factor** | [![GitHub issues](https://img.shields.io/github/issues/AlphaGenes/AlphaPart)](https://github.com/AlphaGenes/AlphaPart/issues) | [![Licence](https://img.shields.io/badge/licence-GPL--3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html) <!-- line break 3 -->                       |
-| [![lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://lifecycle.r-lib.org/articles/stages.html)             |                                                                                                                                                                  | [![CodeFactor](https://www.codefactor.io/repository/github/alphagenes/alphapart/badge)](https://www.codefactor.io/repository/github/alphagenes/alphapart)  | [![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/AlphaGenes/AlphaPart.svg)](https://github.com/AlphaGenes/AlphaPart/) <!-- line break 4 --> |                                                                                                                                                              |
+| Package | Status | Coverage | GitHub | Miscellaneous |
+|----|----|----|----|----|
+| [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/AlphaPart)](https://cran.r-project.org/package=AlphaPart) | [![Development](https://img.shields.io/badge/development-active-blue.svg)](https://img.shields.io/badge/development-active-blue.svg) | [![codecov](https://codecov.io/gh/AlphaGenes/AlphaPart/branch/version-0.8.2/graph/badge.svg?token=WS7YGNSOVL)](https://codecov.io/gh/AlphaGenes/AlphaPart) | [![GitHub version](https://img.shields.io/badge/GitHub-0.6.8.9000-orange.svg?style=flat-square)](https://github.com/AlphaGenes/AlphaPart/) | [![downloads](https://cranlogs.r-pkg.org/badges/AlphaPart)](https://cranlogs.r-pkg.org/badges/AlphaPart) <!-- line break 1 --> |
+| [![CRAN Checks](https://cranchecks.info/badges/summary/AlphaPart)](https://cran.r-project.org/web/checks/check_results_AlphaPart.html) | [![R-CMD-check](https://github.com/AlphaGenes/AlphaPart/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/AlphaGenes/AlphaPart/actions/workflows/R-CMD-check.yaml) | [![lints](https://github.com//AlphaGenes/AlphaPart/workflows/lint/badge.svg)](https://github.com/AlphaGenes/AlphaPart/) | [![Forks](https://img.shields.io/badge/forks-NA-blue.svg)](https://github.com/AlphaGenes/AlphaPart/) | [![total downloads](https://cranlogs.r-pkg.org/badges/grand-total/AlphaPart)](https://cranlogs.r-pkg.org/badges/grand-total/AlphaPart) <!-- line break 2 --> |
+| [![minimal R version](https://img.shields.io/badge/R%3E%3D-3.5.0-6666ff.svg)](https://cran.r-project.org/) | [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/9gjgy9ff2i15fa4q?svg=true)](https://ci.appveyor.com/project/Prof-ThiagoOliveira/alphapart) | **Code Factor** | [![Github Issues](https://img.shields.io/badge/issues-NA-red.svg)](https://github.com/AlphaGenes/AlphaPart/issues) | [![Licence](https://img.shields.io/badge/licence-MIT-blue.svg)](https://opensource.org/licenses/MIT) <!-- line break 3 --> |
+| [![lifecycle](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://lifecycle.r-lib.org/articles/stages.html) |  | [![CodeFactor](https://www.codefactor.io/repository/github/alphagenes/alphapart/badge)](https://www.codefactor.io/repository/github/alphagenes/alphapart) | [![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/AlphaGenes/AlphaPart.svg)](https://github.com/AlphaGenes/AlphaPart/) <!-- line break 4 --> |  |
 
 # Overview
-AlphaPart is a sophisticated R package for partitioning genetic trends ([Obšteter et al. 2021](https://doi.org/10.1186/s12711-021-00600-x)), facilitating a deeper understanding of genetic gain in breeding programs. This method, rooted in the innovative works by [Garcia-Cortes et
-al. (2008)](https://doi.org/10.1017/S175173110800205X) and recent advancements, allows breeders and researchers to dissect the contributions of various selection paths to overall genetic progress.
 
-# Features
+AlphaPart partitions genetic values and their summaries to quantify the
+sources of genetic change in multi-generational pedigrees. The
+partitioning method is described in \[Garcia-Cortes et al. (2008)\]
+(<https://doi.org/10.1017/S175173110800205X>). This method enables a
+retrospective genetic analysis of past changes in a population and is as
+such a counterpart to prospective genetic methods describing genetic
+change. The package includes the main function `AlphaPart` for
+partitioning genetic values and auxiliary functions for manipulating
+data and summarizing, visualizing, and saving results. Genetic values
+can be breeding values, allele dosages, or similar quantities.
 
-* Implements cutting-edge methods for partitioning both genetic means and variances.
-* Includes functions for data manipulation, ensuring compatibility with diverse data sets.
-* Offers advanced tools for visualizing genetic trends and partitioning results.
-* Provides robust summarizing capabilities to interpret complex genetic data.
+# Example
 
-# New in This Version
+As an example, here are plots from the study of [Oliveira et
+al. (2023)](https://doi.org/10.1186/s12711-023-00804-3). First, we show
+distribution of breeding values and their partitions by selected males,
+non-selected males, and all (=“non-selected”) females by generation.
 
-* Incorporates recent methods for partitioning genetic variance, providing a more holistic view of breeding values ([Oliveira et al. 2022](https://doi.org/10.1186/s12711-023-00804-3)).
-* Improved algorithms for more accurate and insightful analysis of breeding programs.
-* New visualization features for a more intuitive understanding of genetic trends.
+![](man/figures/AlphaPart_dist.png)
+
+The partitions were obtained by AlphaPart. As you can see, most of
+genetic change is driven by selected males.
+
+These distributions can be summarized by their means and (co)variances,
+which are shown below. The plots demonstrate again that selected males
+drive most of genetic change in the population - both in increased mean
+and reduced variance.
+
+![](man/figures/AlphaPart_mean.png)
+
+![](man/figures/AlphaPart_var.png)
 
 # Instalation
 
+`AlphaPart` is published on CRAN so you can simply install it using:
+
 ``` r
-# The easiest way to get AlphaPart
 install.packages("AlphaPart")
 ```
 
-## Development version
-
-To get a bug fix or to use a feature from the development version, you
-can install the development version of `AlphaPart` from GitHub.
+To get recent bug fixes you can install the stable new version using:
 
 ``` r
-install.packages("devtools")
-devtools::install_github("AlphaGenes/AlphaPart")
+# install.packages("devtools")
+devtools::install_github("AlphaGenes/AlphaPart@main")
 ```
 
-# Contributing to AlphaPart
+or the current development version using
 
-Please, follow the contribution guide at [Contributing
-file](CONTRIBUTING.md) to know how to start contributing to `AlphaPart`.
+``` r
+# install.packages("devtools")
+devtools::install_github("AlphaGenes/AlphaPart@devel")
+```
 
 # Usage
 
 ``` r
 library(AlphaPart)
+data(AlphaPart.ped)
 
-## Partition additive genetic values by country and sex
-AlphaPart.ped$country.gender <- with(AlphaPart.ped, paste(country, gender, sep="-"))
-(res <- AlphaPart(x=AlphaPart.ped, colPath="country.gender", colBV=c("bv1", "bv2")))
-#> Size:
-#>  - individuals: 8 
-#>  - traits: 2 (bv1, bv2)
-#>  - paths: 4 (domestic-F, domestic-M, import-F, import-M)
-#>  - unknown (missing) values:
-#> bv1 bv2 
-#>   0   0 
+# Partitioning
+res <- AlphaPart(x = AlphaPart.ped, colPath = "country", colBV = "trait1")
+print(res)
+#  Partitions of breeding values 
+#    - individuals: 8 
+#    - paths: 2 (domestic, import)
+#    - traits: 1 (trait1)
+# 
+#  Trait: trait1 
+# 
+#   id father mother generation  country sex trait2 trait1 trait1_pa trait1_ms trait1_domestic trait1_import
+# 1  A                        1 domestic   F     88    100       0.0     100.0         100.000         0.000
+# 2  B                        1   import   M    110    105       0.0     105.0           0.000       105.000
+# 3  C      B      A          2 domestic   F    100    104     102.5       1.5          51.500        52.500
+# 4  T      B                 2   import   F     97    102      52.5      49.5           0.000       102.000
+# 5  D                        2   import   M    101    108       0.0     108.0           0.000       108.000
+# 6  E      D      C          3 domestic   M     80    107     106.0       1.0          26.750        80.250
+# 7  U      D                 3   import   F    102    107      54.0      53.0           0.000       107.000
+# 8  V      E                 4 domestic   F    105    109      53.5      55.5          68.875        40.125
 
+# Summarising (results ommited for brevity, see vignettes for more introduction)
+sumPartByGeneration <- summary(part, by = "generation")
+print(sumPartByGeneration)
 
-#>  Partitions of breeding values 
-#>    - individuals: 8 
-#>    - paths: 4 (domestic-F, domestic-M, import-F, import-M)
-#>    - traits: 2 (bv1, bv2)
-
-#>  Trait: bv1 
-
-#>   IId FId MId gen  country gender country.gender bv1 bv1_pa bv1_w bv1_domestic-F bv1_domestic-M bv1_import-F bv1_import-M
-#> 1   A           1 domestic      F     domestic-F 100    0.0 100.0        100.000            0.0          0.0        0.000
-#> 2   B           1   import      M       import-M 105    0.0 105.0          0.000            0.0          0.0      105.000
-#> 3   C   B   A   2 domestic      F     domestic-F 104  102.5   1.5         51.500            0.0          0.0       52.500
-#> 4   T   B       2   import      F       import-F 102   52.5  49.5          0.000            0.0         49.5       52.500
-#> 5   D           2   import      M       import-M 108    0.0 108.0          0.000            0.0          0.0      108.000
-#> 6   E   D   C   3 domestic      M     domestic-M 107  106.0   1.0         25.750            1.0          0.0       80.250
-#> 7   U   D       3   import      F       import-F 107   54.0  53.0          0.000            0.0         53.0       54.000
-#> 8   V   E       4 domestic      F     domestic-F 109   53.5  55.5         68.375            0.5          0.0       40.125
-
-#>  Trait: bv2 
-
-#>   IId FId MId gen  country gender country.gender bv2 bv2_pa bv2_w bv2_domestic-F bv2_domestic-M bv2_import-F bv2_import-M
-#> 1   A           1 domestic      F     domestic-F  88    0.0  88.0          88.00           0.00          0.0          0.0
-#> 2   B           1   import      M       import-M 110    0.0 110.0           0.00           0.00          0.0        110.0
-#> 3   C   B   A   2 domestic      F     domestic-F 100   99.0   1.0          45.00           0.00          0.0         55.0
-#> 4   T   B       2   import      F       import-F  97   55.0  42.0           0.00           0.00         42.0         55.0
-#> 5   D           2   import      M       import-M 101    0.0 101.0           0.00           0.00          0.0        101.0
-#> 6   E   D   C   3 domestic      M     domestic-M  80  100.5 -20.5          22.50         -20.50          0.0         78.0
-#> 7   U   D       3   import      F       import-F 102   50.5  51.5           0.00           0.00         51.5         50.5
-#> 8   V   E       4 domestic      F     domestic-F 105   40.0  65.0          76.25         -10.25          0.0         39.0
-
-
-## Summarize population by generation (=trend)
-(ret <- summary(res, by="gen"))
-
-#> Summary of partitions of breeding values 
-#>   - paths: 4 (domestic-F, domestic-M, import-F, import-M)
-#>   - traits: 2 (bv1, bv2)
-
-#> Trait: bv1 
-
-#>   gen N      Sum domestic-F domestic-M import-F import-M
-#> 1   1 2 102.5000   50.00000        0.0      0.0   52.500
-#> 2   2 3 104.6667   17.16667        0.0     16.5   71.000
-#> 3   3 2 107.0000   12.87500        0.5     26.5   67.125
-#> 4   4 1 109.0000   68.37500        0.5      0.0   40.125
-
-#> Trait: bv2 
-
-#>   gen N       Sum domestic-F domestic-M import-F import-M
-#> 1   1 2  99.00000      44.00       0.00     0.00 55.00000
-#> 2   2 3  99.33333      15.00       0.00    14.00 70.33333
-#> 3   3 2  91.00000      11.25     -10.25    25.75 64.25000
-#> 4   4 1 105.00000      76.25     -10.25     0.00 39.00000
-
-## Plot the partitions
-p <- plot(ret, ylab=c("BV for trait 1", "BV for trait 2"), xlab="Generation")
-print(p)
+# Plotting (results ommited for brevity, see vignettes for more introduction)
+plot(sumPartByGeneration)
 ```
 
-![](man/figures/README-example1.png)<!-- -->
+# Vignettes
+
+- Introduction to AlphaPart - see [intro](vignettes/intro.Rmd) or
+  `vignette("intro", package = "AlphaPart")`
+
+- AlphaPart: Partitioning genetic values and summarising their trend
+  with mean and variance - see [variance](vignettes/variance.Rmd) or
+  `vignette("variance", package = "AlphaPart")`
+
+- AlphaPart: Accounting for non-zero mean and structure in founders -
+  see [founders](vignettes/founders.Rmd) or
+  `vignette("founders", package = "AlphaPart")`
+
+- AlphaPart: Accounting for uncertainty of estimated genetic values in
+  partitioning - see [samples](vignettes/samples.Rmd) or
+  `vignette("samples", package = "AlphaPart")`
+
+- AlphaPart: Partitioning genotypes - see
+  [genotypes](vignettes/genotypes.Rmd) or
+  `vignette("genotypes", package = "AlphaPart")`
+
+- AlphaPart: Partitioning with idenity-by-descent (IBD) information -
+  see [ibd](vignettes/ibd.Rmd) or
+  `vignette("ibd", package = "AlphaPart")`
+
+- References on the theoretical and applied work in this domain are
+  briefly summarised in [References](vignettes/references.Rmd).

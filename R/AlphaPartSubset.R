@@ -18,14 +18,7 @@
 #' Meta information in slot "info" is modified as well.
 #'
 #' @example inst/examples/examples_AlphaPartSubset.R
-#'
-
-
-#' @useDynLib AlphaPart, .registration = TRUE
-#' @importFrom Rcpp sourceCpp
-#'
 #' @export
-
 AlphaPartSubset <- function(x, paths=NULL) {
 
   ## --- Setup ---
