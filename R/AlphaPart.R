@@ -1,5 +1,6 @@
 #' @useDynLib AlphaPart, .registration = TRUE
 #' @importFrom directlabels direct.label last.qp
+#' @importFrom rlang .data
 #' @importFrom dplyr group_by do
 #' @import ggplot2
 #' @importFrom grDevices dev.cur dev.off

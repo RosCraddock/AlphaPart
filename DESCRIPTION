@@ -37,8 +37,8 @@ Imports:
   dplyr,
   magrittr,
   tibble (>= 3.1.7),
-  directlabels (>= 1.1),
-  ggplot2 (>= 0.8.9)
+  directlabels (>= 2026.4.21),
+  ggplot2 (>= 3.4.0)
 LinkingTo: Rcpp
 NeedsCompilation: yes
 Suggests:

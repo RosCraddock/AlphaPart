@@ -76,6 +76,7 @@ importFrom(directlabels,
   direct.label,
   last.qp
 )
+importFrom(rlang,.data)
 importFrom(dplyr,
   do,
   group_by

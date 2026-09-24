@@ -676,16 +676,18 @@ plot.summaryAlphaPart <-
       ## Prepare plot
       #trait in "" since it is not defined
       trait <- tmp$trait
-      p <- qplot(
-        x = by,
-        y = trait,
-        group = path,
+      p <- ggplot(
         data = tmp,
-        color = path,
-        linetype = path,
-        geom = "line"
-      )
-      p <- p + geom_line(linewidth = lineSize)
+        mapping = aes(
+          x = .data[["by"]],
+          y = .data[["trait"]],
+          group = .data[["path"]],
+          colour = .data[["path"]],
+          linetype = .data[["path"]]
+        )
+      ) +
+        geom_line(linewidth = lineSize)
+    
       p <- p + xlab(label = ifelse(is.null(xlab), by, xlab))
       p <- p + ylab(label = ifelse(is.null(ylab), lT[i], ylab[i])) # lT[i] is the TRAIT!!!
       if (!is.null(xlim)) {
