@@ -76,7 +76,6 @@ importFrom(directlabels,
   direct.label,
   last.qp
 )
-importFrom(rlang,.data)
 importFrom(dplyr,
   do,
   group_by
@@ -89,6 +88,7 @@ importFrom(magrittr,"%>%")
 importFrom(methods,is)
 importFrom(pedigree,orderPed)
 importFrom(reshape,melt)
+importFrom(rlang,.data)
 importFrom(stats,
   aggregate,
   confint,
