@@ -6,6 +6,7 @@
 \usage{
 AlphaPart(
   x,
+  UPGname = "UPG",
   pathNA = FALSE,
   recode = TRUE,
   unknown = NA,
@@ -26,6 +27,10 @@ individual, father, and mother identification, and year of birth;
 see arguments \code{colId}, \code{colFid}, \code{colMid},
 \code{colPath}, and \code{colBV}; see also details about the
 validity of pedigree.}
+
+\item{UPGname}{Character, a string pattern used to define the prefix
+for identifying unknown parent groups. Default prefix is "UPG",
+where unknown parent groups would be identified with "UPG1", "UPG2", etc.}
 
 \item{pathNA}{Logical, set dummy path (to "UNKNOWN") where path
 information is unknown (missing).}
