@@ -33,33 +33,108 @@ test_that("Test input for AlphaPart ped", {
   ped2$fid <- as.character(ped2$fid)
   ped2[is.na(ped2$fid), "fid"] <- "0"
   ped2$fid <- as.factor(ped2$fid)
-  # TODO: Finish test for unknown argument #53
-  #       https://github.com/AlphaGenes/AlphaPart/issues/53
+
+  # The unknown argument is only enforced when recode = FALSE, hence expect no error when recode = TRUE
+  tmp <- AlphaPart(
+    x = ped2[, c("id", "fid", "mid", "pat", "trt1")],
+    pathNA = TRUE
+  )
+
+  ped3 <- ped[order(orderPed(ped = ped[, c("id", "fid", "mid")])), ]
+  # Check recode
+  expect_true(all(tmp$trt1['id'] == ped3['id']))
+  # Check either NA or 0 used for unknown parents and not both
+  # All 0 should now be NAs
+  expect_true(all(is.na(tmp$trt1[1:3, c("fid", "mid")])))
+
+  ped2$mid <- as.character(ped2$mid)
+  ped2[is.na(ped2$mid), "mid"] <- "0"
+  ped2$mid <- as.factor(ped2$mid)
+
+  tmp <- AlphaPart(
+    x = ped2[, c("id", "fid", "mid", "pat", "trt1")],
+    pathNA = TRUE
+  )
+
+  # All 0 should remain (so no NAs)
+  expect_true(all(tmp$trt1[1:3, c("fid", "mid")] == 0))
 
   # ... to test recode argument
-  ped3 <- ped[order(orderPed(ped = ped[, c("id", "fid", "mid")])), ]
+  
   ped3$idI <- seq_len(nrow(ped3))
   ped3$fidI <- match(ped3$fid, ped3$id)
   ped3$midI <- match(ped3$mid, ped3$id)
-  # TODO: Finish test for recode argument #54
-  #       https://github.com/AlphaGenes/AlphaPart/issues/54
+  # Correct ordering and coding
+  expect_no_error(AlphaPart(
+    x = ped3[c("idI", "fidI", "midI", "pat", "trt1")],
+    pathNA = TRUE,
+    recode = FALSE,
+    sort = FALSE,
+    unknown = NA
+  ))
+  # Test whether correct codes but wrong ordering produces an error
+  expect_no_error(AlphaPart(
+    x = ped3[sample(1:13, 13, replace = FALSE),c("idI", "fidI", "midI", "pat", "trt1")],
+    pathNA = TRUE,
+    recode = FALSE,
+    sort = FALSE,
+    unknown = NA
+  ))
+  # Test incorrect coding, i.e father code does not precede offspring
+  ped3$idI[ped3$idI == 7] <- 14
+  ped3$fidI[ped3$fidI == 7] <- 14
+
+  expect_error(AlphaPart(
+    x = ped3[c("idI", "fidI", "midI", "pat", "trt1")],
+    pathNA = TRUE,
+    recode = FALSE,
+    sort = FALSE,
+    unknown = NA
+  ))
+
+  ped3$idI[ped3$idI == 14] <- 7
+  ped3$fidI[ped3$fidI == 14] <- 7
+
+  ped3$idI[ped3$idI == 5] <- 20
+  ped3$midI[ped3$midI == 5] <- 20
+
+  expect_error(AlphaPart(
+    x = ped3[c("idI", "fidI", "midI", "pat", "trt1")],
+    pathNA = TRUE,
+    recode = FALSE,
+    sort = FALSE,
+    unknown = NA
+  ))
+
+  expect_no_error(AlphaPart(
+    x = ped3[c("idI", "fidI", "midI", "pat", "trt1")],
+    pathNA = TRUE,
+    recode = FALSE,
+    sort = TRUE,
+    unknown = NA
+  ))
 
   # ... to test recode and unknown argument
   ped4 <- ped[order(orderPed(ped = ped[, c("id", "fid", "mid")])), ]
   ped4$idI <- seq_len(nrow(ped4))
   ped4$fidI <- match(ped4$fid, ped3$id, nomatch = 99)
   ped4$midI <- match(ped4$mid, ped3$id, nomatch = 99)
+  # Should throw an error as default unknown is NA not 99
   expect_error(AlphaPart(
     x = ped4[, c("idI", "fidI", "midI", "pat", "trt1")],
     pathNA = TRUE,
     recode = FALSE,
+    sort = FALSE,
     verbose = 0
   ))
-  # TODO: Finish test for unknown argument #53
-  #       https://github.com/AlphaGenes/AlphaPart/issues/53
-  #       The above should throw an error, but maybe we need to rip out
-  #       all the unknown handling and just stick with NA
-  #       for all the unknowns!!!!
+  # When sort = TRUE (default), an error will not occur since recode changes to TRUE
+  expect_no_error(AlphaPart(
+    x = ped4[, c("idI", "fidI", "midI", "pat", "trt1")],
+    pathNA = TRUE,
+    recode = FALSE,
+    sort = TRUE,
+    verbose = 0
+  ))
 
   expect_no_error(AlphaPart(
     x = ped4[, c("idI", "fidI", "midI", "pat", "trt1")],
@@ -844,7 +919,7 @@ test_that("UPG records must have breeding values", {
 
   expect_error(
     AlphaPart(x = ped, colId = "id", colFid = "fid", colMid = "mid", colPath = "path", colBV = "trait1", verbose = 0, UPGname = "UPG"),
-    regexp = "genetic value"
+    regexp = "Individual UPG1"
   )
 })
 
@@ -882,7 +957,7 @@ test_that("UPG breeding values differing from founder means produce a warning", 
     }
   )
 
-  expect_true(grepl("UPG1", warning_message, fixed = TRUE))
+  expect_true(grepl("UPG1", warning_message))
   expect_true(grepl("mean", warning_message, ignore.case = TRUE))
 })
 

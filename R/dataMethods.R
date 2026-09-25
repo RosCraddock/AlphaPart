@@ -181,7 +181,8 @@ NAToUnknown.default <- function(x, unknown, force = FALSE, call. = FALSE, ...) {
     stop(sprintf("'x' already has value %s", dQuote(unknown)))
   classX <- class(x)[1]
   classUnk <- class(unknown)[1]
-  if (classX != classUnk) {
+  if (classX != classUnk &&
+    !(is.matrix(x) && is.numeric(unknown))) {
     tmp <- c("integer", "numeric")
     if (!(classX %in% tmp && classUnk %in% tmp)) {
       warning(
