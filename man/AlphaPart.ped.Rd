@@ -21,7 +21,7 @@ A data frame with 8 rows and 8 variables:
 Simulation.
 }
 \usage{
-AlphaPart.ped
+data(AlphaPart.ped)
 }
 \description{
 A dataset containing pedigree information and traits
