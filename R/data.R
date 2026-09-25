@@ -18,5 +18,4 @@
 #' @examples
 #' data(AlphaPart.ped)
 #' print(AlphaPart.ped)
-#' @export
 "AlphaPart.ped"

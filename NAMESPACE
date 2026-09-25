@@ -49,7 +49,6 @@ export(.isCharacterMap)
 export(.unknownList)
 export(.unlistLevelsMap)
 export(AlphaPart)
-export(AlphaPart.ped)
 export(AlphaPartSubset)
 export(AlphaPartSum)
 export(NAToUnknown)
@@ -72,36 +71,26 @@ export(unknownToNA)
 export(write.csv)
 import(ggplot2)
 importFrom(Rcpp,sourceCpp)
-importFrom(directlabels,
-  direct.label,
-  last.qp
-)
-importFrom(dplyr,
-  do,
-  group_by
-)
-importFrom(grDevices,
-  dev.cur,
-  dev.off
-)
+importFrom(directlabels,direct.label)
+importFrom(directlabels,last.qp)
+importFrom(dplyr,do)
+importFrom(dplyr,group_by)
+importFrom(grDevices,dev.cur)
+importFrom(grDevices,dev.off)
 importFrom(magrittr,"%>%")
 importFrom(methods,is)
 importFrom(pedigree,orderPed)
 importFrom(reshape,melt)
 importFrom(rlang,.data)
-importFrom(stats,
-  aggregate,
-  confint,
-  cov,
-  lm,
-  sd,
-  var
-)
+importFrom(stats,aggregate)
+importFrom(stats,confint)
+importFrom(stats,cov)
+importFrom(stats,lm)
+importFrom(stats,sd)
+importFrom(stats,var)
 importFrom(tibble,is_tibble)
-importFrom(utils,
-  head,
-  str,
-  tail,
-  write.csv2
-)
+importFrom(utils,head)
+importFrom(utils,str)
+importFrom(utils,tail)
+importFrom(utils,write.csv2)
 useDynLib(AlphaPart, .registration = TRUE)
