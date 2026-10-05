@@ -532,26 +532,45 @@ plot.summaryAlphaPart <-
     if (!is.null(ylab) && length(ylab) < nT) ylab <- rep(ylab, length = nT)
 
     ## Colors
-    if (!missing(color)) {
-      if (length(color) < nP) color <- rep(color, length = nP)
-      color <- c("black", color)
-    } else {
-      if (nP <= 8L) {
-        palette_name <- "Dark 2"
+    if (isTRUE(addSum)) {
+      if (!missing(color)) {
+        if (length(color) < nP) color <- rep(color, length = nP)
+        color <- c("black", color)
       } else {
-        palette_name <- "viridis"
+        if (nP <= 8L) {
+          palette_name <- "Dark 2"
+        } else {
+          palette_name <- "viridis"
+        }
+        color <- c(
+          "black",
+          grDevices::hcl.colors(n = max(8L, nP), palette = palette_name)
+        )
       }
-      color <- c(
-        "black",
-        grDevices::hcl.colors(n = max(8L, nP), palette = palette_name)
-      )
+    } else {
+      if (!missing(color)) {
+        if (length(color) < nP) color <- rep(color, length = nP)
+      } else {
+        if (nP <= 8L) {
+          palette_name <- "Dark 2"
+        } else {
+          palette_name <- "viridis"
+        }
+        color <- grDevices::hcl.colors(n = max(8L, nP), palette = palette_name)
+      }
     }
     ## Line type
     if (is.null(lineTypeList)) {
-      if (length(lineType) < nP) {
-        lineType <- c(1, rep(x = lineType, times = nP))
+      if (isTRUE(addSum)) {
+        if (length(lineType) < nP) {
+          lineType <- c(1, rep(x = lineType, times = nP))
+        } else {
+          lineType <- c(1, lineType)
+        }
       } else {
-        lineType <- c(1, lineType)
+        if (length(lineType) < nP) {
+          lineType <- rep(x = lineType, length.out = nP)
+        }
       }
     }
     ## --- Create plots ---
@@ -572,19 +591,29 @@ plot.summaryAlphaPart <-
         colnames(tmp0) <- tmpCol
         warning("changing path name from 'N' to 'N.'")
       }
-      columnsToMelt <- setdiff(names(tmp0), c("N", by))
-      tmp <- stats::reshape(
-        tmp0[, c(by, columnsToMelt)],
-        idvar = by,
-        varying = columnsToMelt,
-        v.names = "trait",
-        timevar = "path",
-        times = columnsToMelt,
-        direction = "long"
+      if (isTRUE(addSum)) {
+        plot_cols <- names(tmp0)
+      } else {
+        plot_cols <- setdiff(names(tmp0), x$info$labelSum)
+      }
+      columnsToMelt <- setdiff(plot_cols, c("N", by))
+      if (length(columnsToMelt) == 0L) {
+        stop(
+          "No plotting columns are available after excluding 'N', the grouping variable '",
+          by,
+          "', and the overall Sum line.",
+          call. = FALSE
+        )
+      }
+      tmp <- data.frame(
+        by = rep(tmp0[[by]], times = length(columnsToMelt)),
+        path = factor(
+          rep(columnsToMelt, each = nrow(tmp0)),
+          levels = columnsToMelt
+        ),
+        trait = unlist(tmp0[, columnsToMelt, drop = FALSE], use.names = FALSE)
       )
-      tmp <- tmp[, c(by, "path", "trait")]
       rownames(tmp) <- NULL
-      colnames(tmp) <- c("by", "path", "trait")
       if (is.logical(sortValue)) {
         if (sortValue) {
           nC <- ncol(tmp0)
@@ -594,7 +623,12 @@ plot.summaryAlphaPart <-
             na.rm = TRUE
           )
           levs <- names(sort(pathStat, decreasing = sortValueDec))
-          tmp$path <- factor(tmp$path, levels = c(x$info$labelSum, levs))
+          if (isTRUE(addSum)) {
+            path_levels <- c(x$info$labelSum, levs)
+          } else {
+            path_levels <- levs
+          }
+          tmp$path <- factor(tmp$path, levels = path_levels)
           if (!is.null(lineTypeList)) {
             ## fiddle with upper (color) and lower (line type) level of paths
             levs2X <- names(lineTypeList)
@@ -617,7 +651,12 @@ plot.summaryAlphaPart <-
           }
         }
       } else {
-        tmp$path <- factor(tmp$path, levels = c(x$info$labelSum, sortValue))
+        if (isTRUE(addSum)) {
+          path_levels <- c(x$info$labelSum, sortValue)
+        } else {
+          path_levels <- sortValue
+        }
+        tmp$path <- factor(tmp$path, levels = path_levels)
       }
       ## Prepare plot
       #trait in "" since it is not defined
@@ -679,7 +718,9 @@ plot.summaryAlphaPart <-
           path_levels <- levels(tmp$path)
           path_colours <- colorI[seq_along(path_levels)]
           names(path_colours) <- path_levels
-          path_colours[x$info$labelSum] <- "black"
+          if (isTRUE(addSum)) {
+            path_colours[x$info$labelSum] <- "black"
+          }
           p <- p + scale_colour_manual(values = path_colours, guide = "none")
           p <- p +
             geom_text(

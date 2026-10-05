@@ -18,4 +18,10 @@ test_that("Test plotSummary.AlphaPart", {
   p1 <- plot.summaryAlphaPart(sum)
   expect_s3_class(p1, "plotSummaryAlphaPart")
   expect_equal(is.list(p1), TRUE)
+
+  # Check no sum line is plotted
+  p2 <- plot.summaryAlphaPart(sum, addSum = FALSE)
+  built <- ggplot2::ggplot_build(p2[[1]])$data[[1]]
+  expect_false("Sum" %in% unique(built$group))
+
 })
