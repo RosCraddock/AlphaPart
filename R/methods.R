@@ -76,8 +76,9 @@ print.summaryAlphaPart <- function(x, ...) {
     ")\n",
     sep = ""
   )
-  if (length(x$info$warn) > 0)
+  if (length(x$info$warn) > 0) {
     cat("   - warning: ", paste(x$info$warn, collapse = "\n"), "\n", sep = "")
+  }
 
   for (trt in x$info$lT) {
     cat("\n Trait:", trt, "\n\n")
@@ -127,8 +128,9 @@ print.AlphaPart <- function(x, n = 6, ...) {
     ")\n",
     sep = ""
   )
-  if (length(x$info$warn) > 0)
+  if (length(x$info$warn) > 0) {
     cat("   - warning: ", paste(x$info$warn, collapse = "\n"), "\n", sep = "")
+  }
 
   for (trt in x$info$lT) {
     cat("\n Trait:", trt, "\n\n")
@@ -199,15 +201,14 @@ print.AlphaPart <- function(x, n = 6, ...) {
 #' There is a handy plot method (\code{\link[AlphaPart]{plot.summaryAlphaPart}}) for output.
 #' @export
 summary.AlphaPart <- function(
-  object,
-  by = NULL,
-  FUN = mean,
-  labelSum = "Sum",
-  subset = NULL,
-  sums = FALSE,
-  cov = FALSE,
-  ...
-) {
+    object,
+    by = NULL,
+    FUN = mean,
+    labelSum = "Sum",
+    subset = NULL,
+    sums = FALSE,
+    cov = FALSE,
+    ...) {
   ## --- Setup ---
   groupSummary <- sums
   # Test Alpha Part Class
@@ -223,7 +224,7 @@ summary.AlphaPart <- function(
     if (test == FALSE) {
       stop("argument 'FUN' must be a function", call. = FALSE)
     }
-    FUN = get(FUN)
+    FUN <- get(FUN)
   }
   # Test for covariance output
   test <- is.logical(cov)
@@ -282,7 +283,7 @@ summary.AlphaPart <- function(
       . <- NULL
       if (!groupSummary) {
         if (is.null(by)) {
-          #pri length ne sme biti na.rm = TRUE
+          # pri length ne sme biti na.rm = TRUE
           tmp <- rep(1, times = nrow(object[[i]]))
           tmpM <- aggregate(
             x = object[[i]][, cols],
@@ -298,7 +299,7 @@ summary.AlphaPart <- function(
                   cov = 2 *
                     t(cov(.[, cols[-1]], .[, cols[-1]])[
                       lower.tri(cov(.[, cols[-1]], .[, cols[-1]]), diag = FALSE)
-                  ])
+                    ])
                 ))
               if (is.null(ncol(tmpM2)) == FALSE) {
                 tmpM2 <- tmpM2[, -1]
@@ -328,7 +329,7 @@ summary.AlphaPart <- function(
                   cov = 2 *
                     t(cov(.[, cols[-1]], .[, cols[-1]])[
                       lower.tri(cov(.[, cols[-1]], .[, cols[-1]]), diag = FALSE)
-                ])
+                    ])
                 ))
               if (is.null(ncol(tmpM2)) == FALSE) {
                 tmpM2 <- tmpM2[, -1]
@@ -374,7 +375,7 @@ summary.AlphaPart <- function(
       ## Summarize non-variance partitioning
       if (!groupSummary) {
         if (is.null(by)) {
-          #pri length ne sme biti na.rm = TRUE
+          # pri length ne sme biti na.rm = TRUE
           tmp <- rep(1, times = nrow(object[[i]]))
           tmpM <- aggregate(
             x = object[[i]][, cols],
@@ -490,35 +491,36 @@ summary.AlphaPart <- function(
 #' @export
 plot.summaryAlphaPart <-
   function(
-    x,
-    by = NULL,
-    sortValue = TRUE,
-    sortValueFUN = sum,
-    sortValueDec = TRUE,
-    addSum = TRUE,
-    paths = NULL,
-    xlab = NULL,
-    ylab = NULL,
-    xlim = NULL,
-    ylim = NULL,
-    color,
-    lineSize = 1,
-    lineType = 1,
-    lineTypeList = NULL,
-    useDirectLabels = TRUE,
-    labelPath = NULL,
-    ...
-  ) {
+      x,
+      by = NULL,
+      sortValue = TRUE,
+      sortValueFUN = sum,
+      sortValueDec = TRUE,
+      addSum = TRUE,
+      paths = NULL,
+      xlab = NULL,
+      ylab = NULL,
+      xlim = NULL,
+      ylim = NULL,
+      color,
+      lineSize = 1,
+      lineType = 1,
+      lineTypeList = NULL,
+      useDirectLabels = TRUE,
+      labelPath = NULL,
+      ...) {
     ## --- Setup ---
-    if (!inherits(x, "summaryAlphaPart"))
+    if (!inherits(x, "summaryAlphaPart")) {
       stop("'x' must be of a summaryAlphaPart class")
+    }
 
     by <- x$info$by
     ## by argument
-    if (is.null(by))
+    if (is.null(by)) {
       stop(
         "output is provided only when the 'by' argument is defined on the 'summary' function"
       )
+    }
     path <- x$info$path
     lT <- x$info$lT
     nT <- x$info$nT
@@ -527,8 +529,9 @@ plot.summaryAlphaPart <-
     names(ret) <- x$info$lT
 
     ## Axis labels
-    if (!is.null(xlab) && length(xlab) > 1)
+    if (!is.null(xlab) && length(xlab) > 1) {
       stop("you can provide only one value for 'xlab'")
+    }
     if (!is.null(ylab) && length(ylab) < nT) ylab <- rep(ylab, length = nT)
 
     ## Colors
@@ -659,7 +662,7 @@ plot.summaryAlphaPart <-
         tmp$path <- factor(tmp$path, levels = path_levels)
       }
       ## Prepare plot
-      #trait in "" since it is not defined
+      # trait in "" since it is not defined
       trait <- tmp$trait
       if (isTRUE(useDirectLabels)) {
         p <- ggplot(
@@ -751,7 +754,7 @@ plot.summaryAlphaPart <-
           )
       }
       ret[[i]] <- p
-      }
+    }
 
     ## --- Return ---
 
@@ -805,18 +808,19 @@ savePlot <- function(...) {
 #' screen during the process and at the end invisibly returned.
 #' @export
 savePlot.plotSummaryAlphaPart <- function(
-  x, ##<< plotSummaryAlphaPart, output object from
-  ## \code{\link[AlphaPart]{plot.summaryAlphaPart}} function
-  filename = paste("Rplot", type, sep = "."), ##<< character, filename to save to
-  type = c("pdf", "png", "jpeg", "tiff", "bmp"), ##<< character, file/device type
-  device = dev.cur(), ##<< device, the device to save from (not used for this method)
-  pre.hook = NULL, ##<<
-  traitsAsDir = FALSE, ##<<
-  ... ##<<
-) {
+    x, ## << plotSummaryAlphaPart, output object from
+    ## \code{\link[AlphaPart]{plot.summaryAlphaPart}} function
+    filename = paste("Rplot", type, sep = "."), ## << character, filename to save to
+    type = c("pdf", "png", "jpeg", "tiff", "bmp"), ## << character, file/device type
+    device = dev.cur(), ## << device, the device to save from (not used for this method)
+    pre.hook = NULL, ## <<
+    traitsAsDir = FALSE, ## <<
+    ... ## <<
+    ) {
   if (length(filename) > 1) stop("'filename' argument must be of length one")
-  if (!inherits(x, "plotSummaryAlphaPart"))
+  if (!inherits(x, "plotSummaryAlphaPart")) {
     stop("'x' must be of a 'plotSummaryAlphaPart' class")
+  }
   filenameOrig <- sub(
     pattern = paste(".", type, "$", sep = ""),
     replacement = "",
@@ -857,10 +861,10 @@ savePlot.plotSummaryAlphaPart <- function(
 #' @aliases savePlot.default
 #' @export
 savePlot.default <- function(...) {
-  ##seealso<< \code{\link[grDevices]{savePlot}} help page on the default
+  ## seealso<< \code{\link[grDevices]{savePlot}} help page on the default
   ## \code{savePlot} method in the \pkg{grDevices} package
 
   grDevices::savePlot(...)
 
-  ##value<< See \code{\link[grDevices]{savePlot}} for details.
+  ## value<< See \code{\link[grDevices]{savePlot}} for details.
 }

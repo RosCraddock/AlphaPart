@@ -59,13 +59,12 @@ write.csv.default <- function(...) {
 #' results.
 #' @export
 write.csv.AlphaPart <- function(
-  x,
-  file,
-  traitsAsDir = FALSE,
-  csv2 = TRUE,
-  row.names = FALSE,
-  ...
-) {
+    x,
+    file,
+    traitsAsDir = FALSE,
+    csv2 = TRUE,
+    row.names = FALSE,
+    ...) {
   # --- Setup ---
 
   if (length(file) > 1) stop("'file' argument must be of length one")
@@ -104,18 +103,18 @@ write.csv.AlphaPart <- function(
 #' @describeIn write.csv Save summaries of partitioned genetic values to CSV files on disk
 #' @export
 write.csv.summaryAlphaPart <- function(
-  x,
-  file,
-  traitsAsDir = FALSE,
-  csv2 = TRUE,
-  row.names = FALSE,
-  ...
-) {
+    x,
+    file,
+    traitsAsDir = FALSE,
+    csv2 = TRUE,
+    row.names = FALSE,
+    ...) {
   # --- Setup ---
 
   if (length(file) > 1) stop("'file' argument must be of length one")
-  if (!inherits(x, "summaryAlphaPart"))
+  if (!inherits(x, "summaryAlphaPart")) {
     stop("'x' must be of a 'summaryAlphaPart' class")
+  }
   fileOrig <- sub(pattern = ".csv$", replacement = "", x = file)
   ret <- NULL
 

@@ -86,8 +86,6 @@ can be used to visualise this data in eye pleasing way using
 ggplot2 graphics.
 }
 \examples{
-\donttest{
-
 # Partition genetic values by country
 data(AlphaPart.ped)
 (res <- AlphaPart(x=AlphaPart.ped, colPath="country", colBV=c("trait1", "trait2")))
@@ -124,5 +122,4 @@ p <- plot(ret, ylab=c("BV for trait 1", "BV for trait 2"), xlab="Generation",
         sortValue=FALSE, lineSize=4,
         xlim=c(-1, 7))
 print(p)
-}
 }

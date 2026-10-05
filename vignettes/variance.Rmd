@@ -80,8 +80,10 @@ table(data$path)
 As shown above, males are grouped into selected and non-selected because some were used as fathers of next generations, but some were not. Femalee are on the other hand all in one group. While the group's name is "non-selected", they have all been used as mothers of next generations. Hence there was no selection among females, and we expect that female group will not contribute to change in genetic mean over generations.
 
 ```{r}
-part <- AlphaPart(data, colId = "ind", colFid = "father", 
-                  colMid = "mother", colBV = "tbv", colPath = "path")
+part <- AlphaPart(data,
+  colId = "ind", colFid = "father",
+  colMid = "mother", colBV = "tbv", colPath = "path"
+)
 head(part$tbv) %>%
   knitr::kable(digits = 2)
 ```
@@ -127,18 +129,24 @@ part$tbv %>%
     alpha = .4, point_alpha = 1, rel_min_height = 0.01
   ) +
   geom_density_ridges(
-    aes(y = as.factor(generation), x = `tbv_M:Non-Selected`, fill = "M - Non-Selected",
-        linetype = "M - Non-Selected"),
+    aes(
+      y = as.factor(generation), x = `tbv_M:Non-Selected`, fill = "M - Non-Selected",
+      linetype = "M - Non-Selected"
+    ),
     alpha = .4, point_alpha = 1, rel_min_height = 0.01
   ) +
   geom_density_ridges(
-    aes(y = as.factor(generation), x = `tbv_M:Selected`, fill = "M - Selected",
-        linetype = "M - Selected"),
+    aes(
+      y = as.factor(generation), x = `tbv_M:Selected`, fill = "M - Selected",
+      linetype = "M - Selected"
+    ),
     alpha = .4, point_alpha = 1, rel_min_height = 0.01
   ) +
   geom_density_ridges(
-    aes(y = as.factor(generation), x = `tbv`,
-        fill = "Sum", linetype = "Sum"),
+    aes(
+      y = as.factor(generation), x = `tbv`,
+      fill = "Sum", linetype = "Sum"
+    ),
     alpha = .4, point_alpha = 1, rel_min_height = 0.01
   ) +
   ylab("Generation") +
@@ -147,7 +155,7 @@ part$tbv %>%
   theme_bw(base_size = 20) +
   theme(
     legend.position = "top"
-  ) 
+  )
 ```
 
 The above plot shows how the distribution of breeding values changed over generations (pink), and how the three partitions contributed to this change (red for "non-selected" females, green for non-selected males, and blue for selected males). The non-selected male distribution (green) is always centred around zero, indicating that they don't contribute to the genetic changes. The "non-selected" females (red) contribute positively to the genetic change, even though they are not selected, however, they contribute through propagating the genetic contributions of their selected fathers (e.g., Woolliams, et al. 1999).
@@ -158,19 +166,26 @@ We can now summarise these distributions by their means, variances, and covarian
 partMean$tbv %>%
   ggplot(aes(y = Sum, x = generation, colour = "Sum")) +
   scale_linetype_manual(
-    values = c("solid", "longdash", "dashed", "dotted"))+
+    values = c("solid", "longdash", "dashed", "dotted")
+  ) +
   geom_line() +
-  geom_line(aes(y = `F:Non-Selected`, x = generation, 
-                colour = "F"), alpha = 0.8) +
-  geom_line(aes(y = `M:Selected`, x = generation,
-                colour = "M(S)"), alpha = 0.8) +
-  geom_line(aes(y = `M:Non-Selected`, x = generation,
-                colour = "M(N)"), alpha = 0.8) +
+  geom_line(aes(
+    y = `F:Non-Selected`, x = generation,
+    colour = "F"
+  ), alpha = 0.8) +
+  geom_line(aes(
+    y = `M:Selected`, x = generation,
+    colour = "M(S)"
+  ), alpha = 0.8) +
+  geom_line(aes(
+    y = `M:Non-Selected`, x = generation,
+    colour = "M(N)"
+  ), alpha = 0.8) +
   geom_vline(xintercept = 0, linetype = 2, alpha = 0.3) +
   ylab("Genetic mean") +
   xlab("Generation") +
   labs(colour = "Path:") +
-  theme_bw(base_size = 18) + 
+  theme_bw(base_size = 18) +
   theme(legend.position = "top")
 ```
 
@@ -180,18 +195,30 @@ partMean$tbv %>%
 partVar$tbv %>%
   ggplot(aes(y = Sum, x = generation, colour = "Sum")) +
   geom_line() +
-  geom_line(aes(y = `F:Non-Selected`, x = generation,
-            colour = "F"), alpha = 0.8) +
-  geom_line(aes(y = `F:Non-SelectedM:Selected`, x = generation,
-            colour = "F:M(S)"), linewidth = 0.5, alpha = 0.8) +
-  geom_line(aes(y = `F:Non-SelectedM:Non-Selected`, x = generation,
-            colour = "F:M(N)"), linewidth = 0.5, alpha = 0.6) +
-  geom_line(aes(y = `M:Non-SelectedM:Selected`, x = generation,
-            colour = "M(N):M(S)"), size = 0.5, alpha = 0.6) +
-  geom_line(aes(y = `M:Selected`, x = generation,
-            colour = "M(S)"), alpha = 0.8) +
-  geom_line(aes(y = `M:Non-Selected`, x = generation,
-            colour = "M(N)"), linewidth = 0.5, alpha = 0.8) +
+  geom_line(aes(
+    y = `F:Non-Selected`, x = generation,
+    colour = "F"
+  ), alpha = 0.8) +
+  geom_line(aes(
+    y = `F:Non-SelectedM:Selected`, x = generation,
+    colour = "F:M(S)"
+  ), linewidth = 0.5, alpha = 0.8) +
+  geom_line(aes(
+    y = `F:Non-SelectedM:Non-Selected`, x = generation,
+    colour = "F:M(N)"
+  ), linewidth = 0.5, alpha = 0.6) +
+  geom_line(aes(
+    y = `M:Non-SelectedM:Selected`, x = generation,
+    colour = "M(N):M(S)"
+  ), size = 0.5, alpha = 0.6) +
+  geom_line(aes(
+    y = `M:Selected`, x = generation,
+    colour = "M(S)"
+  ), alpha = 0.8) +
+  geom_line(aes(
+    y = `M:Non-Selected`, x = generation,
+    colour = "M(N)"
+  ), linewidth = 0.5, alpha = 0.8) +
   geom_vline(xintercept = 0, linetype = 2, alpha = 0.3) +
   ylab("Genetic (co)variance") +
   xlab("Generation") +

@@ -42,7 +42,7 @@ test_that("Test input for AlphaPart ped", {
 
   ped3 <- ped[order(orderPed(ped = ped[, c("id", "fid", "mid")])), ]
   # Check recode
-  expect_true(all(tmp$trt1['id'] == ped3['id']))
+  expect_true(all(tmp$trt1["id"] == ped3["id"]))
   # Check either NA or 0 used for unknown parents and not both
   # All 0 should now be NAs
   expect_true(all(is.na(tmp$trt1[1:3, c("fid", "mid")])))
@@ -60,7 +60,7 @@ test_that("Test input for AlphaPart ped", {
   expect_true(all(tmp$trt1[1:3, c("fid", "mid")] == 0))
 
   # ... to test recode argument
-  
+
   ped3$idI <- seq_len(nrow(ped3))
   ped3$fidI <- match(ped3$fid, ped3$id)
   ped3$midI <- match(ped3$mid, ped3$id)
@@ -74,7 +74,7 @@ test_that("Test input for AlphaPart ped", {
   ))
   # Test whether correct codes but wrong ordering produces an error
   expect_no_error(AlphaPart(
-    x = ped3[sample(1:13, 13, replace = FALSE),c("idI", "fidI", "midI", "pat", "trt1")],
+    x = ped3[sample(1:13, 13, replace = FALSE), c("idI", "fidI", "midI", "pat", "trt1")],
     pathNA = TRUE,
     recode = FALSE,
     sort = FALSE,
@@ -863,7 +863,7 @@ test_that("no UPGs and non-zero founder mean produces warning", {
   expect_true(grepl("UPG", warning_message, ignore.case = TRUE))
 })
 
-test_that("UPG has it's own record",{
+test_that("UPG has it's own record", {
   ped <- data.frame(
     id = c("A", "B", "C"),
     fid = c("UPG1", NA, "A"),

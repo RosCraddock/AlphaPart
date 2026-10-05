@@ -71,9 +71,11 @@ This `data.frame` has information on 8 individuals with these columns:
 If we would like to partition breeding values for the first trait by country to analyse domestic and import contributions, we would run:
 
 ```{r}
-part <- AlphaPart(x = AlphaPart.ped,
-                  colPath = "country",
-                  colBV = "trait1")
+part <- AlphaPart(
+  x = AlphaPart.ped,
+  colPath = "country",
+  colBV = "trait1"
+)
 ```
 
 Inspection of the output object shown below reveals that we computed parent average and Mendelian sampling terms for each individual and then attributed the Mendelian sampling terms to the paths defined by the country variable. As an exercise, you can partition by sex.
@@ -123,9 +125,11 @@ if (require(pedigreeTools)) {
   ped$father[ped$father == ""] <- NA
   ped$mother[ped$mother == ""] <- NA
   ped[] <- lapply(ped, as.character)
-  ped <- pedigree(label = ped$id,
-                  sire = ped$father,
-                  dam = ped$mother)
+  ped <- pedigree(
+    label = ped$id,
+    sire = ped$father,
+    dam = ped$mother
+  )
   getT(ped)
 }
 ```
