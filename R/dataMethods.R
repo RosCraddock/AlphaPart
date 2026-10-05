@@ -334,6 +334,17 @@ NAToUnknown.data.frame <- function(
 #' @aliases is.object_sizes
 #' @aliases format.object_sizes
 #' @aliases print.object_sizes
+#' @param x object or objects whose size should be measured
+#' @param quote logical; should strings be quoted?
+#' @param humanReadable logical or NULL; should sizes be formatted in human-readable form?
+#' @param standard character string; unit standard to use
+#' @param units character; units to use in printing
+#' @param digits integer; number of significant digits
+#' @param width integer; width of printed output
+#' @param sep character; separator used in printed output
+#' @param justify character; justification for printing
+#' @param ... additional arguments passed to methods
+#' @param recursive logical; whether to recurse when combining
 #' @seealso
 #' \code{\link[AlphaPart]{AlphaPart}}
 #'
@@ -473,6 +484,14 @@ c.object_sizes <- function(..., recursive = FALSE) {
 #' @param combine boolean, combine levels, look into details
 #' @param ... additional arguments for \code{sort}
 #' @param value levelsMap or listLevelsMap, output of \code{mapLevels} methods or constructed by user, look into details
+#' @param ind logical; whether to return indices
+#' @param i index used for subsetting
+#' @param check logical; whether to validate the map
+#' @param method character; validation method
+#' @param recursive logical; whether to recurse in combining
+#' @param decreasing logical; sort decreasing
+#' @param na.last logical; argument passed to order for NA handling
+#' @param incomparables argument passed to duplicated()
 #' @seealso
 #' \code{\link[AlphaPart]{AlphaPart}}
 #'

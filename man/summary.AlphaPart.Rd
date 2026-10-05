@@ -81,11 +81,11 @@ ret <- summary(res, by = "generation")
 # Summarize population by generation (=trend) but only for domestic location
 ret <- summary(res, by = "generation", subset = res[[1]]$country == "domestic")
 
-# --- Partition genetic values by loc and gender ---
+# --- Partition genetic values by loc and sex ---
 
 AlphaPart.ped$country.gender <- with(
   AlphaPart.ped,
-  paste(country, gender, sep = "-")
+  paste(country, sex, sep = "-")
 )
 res <- AlphaPart(
   x = AlphaPart.ped,

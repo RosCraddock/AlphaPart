@@ -101,6 +101,22 @@ create integer levelsMap (with internal codes) or character levelsMap (with leve
 
 \item{...}{additional arguments for \code{sort}}
 
+\item{ind}{logical; whether to return indices}
+
+\item{i}{index used for subsetting}
+
+\item{check}{logical; whether to validate the map}
+
+\item{method}{character; validation method}
+
+\item{recursive}{logical; whether to recurse in combining}
+
+\item{decreasing}{logical; sort decreasing}
+
+\item{na.last}{logical; argument passed to order for NA handling}
+
+\item{incomparables}{argument passed to duplicated()}
+
 \item{value}{levelsMap or listLevelsMap, output of \code{mapLevels} methods or constructed by user, look into details}
 }
 \description{

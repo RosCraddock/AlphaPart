@@ -40,6 +40,29 @@ as.object_sizes(x)
 
 \method{c}{object_sizes}(..., recursive = FALSE)
 }
+\arguments{
+\item{...}{additional arguments passed to methods}
+
+\item{x}{object or objects whose size should be measured}
+
+\item{quote}{logical; should strings be quoted?}
+
+\item{humanReadable}{logical or NULL; should sizes be formatted in human-readable form?}
+
+\item{standard}{character string; unit standard to use}
+
+\item{units}{character; units to use in printing}
+
+\item{digits}{integer; number of significant digits}
+
+\item{width}{integer; width of printed output}
+
+\item{sep}{character; separator used in printed output}
+
+\item{justify}{character; justification for printing}
+
+\item{recursive}{logical; whether to recurse when combining}
+}
 \description{
 Provides an estimate of the memory that is being used to store \code{R} objects.
 }

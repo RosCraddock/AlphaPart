@@ -17,10 +17,11 @@ summary(tmp, by="gen")
 ## Summarize by generation (genetic variance)
 summary(tmp, by="gen", FUN = var)
 
-\donttest{
-## There are also two demos
-  demo(topic="AlphaPart_deterministic", package="AlphaPart",
-       ask=interactive())
-  demo(topic="AlphaPart_stochastic",     package="AlphaPart",
-       ask=interactive())
-}
+# Cannot find the demos described below. TODO: remove or create them?
+# \donttest{
+# ## There are also two demos
+#   demo(topic="AlphaPart_deterministic", package="AlphaPart",
+#        ask=interactive())
+#   demo(topic="AlphaPart_stochastic",     package="AlphaPart",
+#        ask=interactive())
+# }

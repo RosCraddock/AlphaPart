@@ -5,20 +5,20 @@ data(AlphaPart.ped)
 (res <- AlphaPart(x=AlphaPart.ped, colPath="country", colBV=c("trait1", "trait2")))
 
 # Summarize population by generation (=trend)
-(ret <- summary(res, by="gen"))
+(ret <- summary(res, by="generation"))
 
 # Plot the partitions
 p <- plot(ret, ylab=c("bv for trait 1", "bv for trait 2"), xlab="Generation")
-print(p[[1]]$abs)
-print(p[[2]]$abs)
-print(p)
+print(p[[1]])
+print(p[[2]])
+# print(p)
 
 # Partition genetic values by country and sex
-AlphaPart.ped$country.gender <- with(AlphaPart.ped, paste(country, gender, sep="-"))
+AlphaPart.ped$country.gender <- with(AlphaPart.ped, paste(country, sex, sep="-"))
 (res <- AlphaPart(x=AlphaPart.ped, colPath="country.gender", colBV=c("trait1", "trait2")))
 
 # Summarize population by generation (=trend)
-(ret <- summary(res, by="gen"))
+(ret <- summary(res, by="generation"))
 
 # Plot the partitions
 p <- plot(ret, ylab=c("BV for trait 1", "BV for trait 2"), xlab="Generation")

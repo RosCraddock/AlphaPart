@@ -122,7 +122,7 @@ ped
 
 Then we will run AlphaPart as before.
 
-```{r}
+```{r, error = TRUE}
 part <- AlphaPart(x = ped, colId = "id", colFid = "fid", colMid = "mid", colPath = "sex", colBV = "trait1")
 ```
 
