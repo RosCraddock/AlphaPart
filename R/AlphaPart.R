@@ -1,17 +1,13 @@
 #' @useDynLib AlphaPart, .registration = TRUE
-#' @importFrom directlabels direct.label last.qp
 #' @importFrom rlang .data
 #' @importFrom dplyr group_by do
 #' @import ggplot2
 #' @importFrom grDevices dev.cur dev.off
-#' @importFrom magrittr %>%
 #' @importFrom methods is
 #' @importFrom pedigree orderPed
 #' @importFrom Rcpp sourceCpp
-#' @importFrom reshape melt
 #' @importFrom stats aggregate cov sd var
 #' @importFrom utils head str tail write.csv2
-#' @importFrom tibble is_tibble
 
 #' @description
 #' AlphaPart partitions genetic values and their summaries to
@@ -172,8 +168,8 @@ AlphaPart <- function(
   colBy = NULL
 ) {
   ## Test if the data is a data.frame
-  if (is_tibble(x)) {
-    x <- as.data.frame(x)
+  if (inherits(x, "tbl_df")) {
+  x <- as.data.frame(x)
   }
   ## --- Setup ---
   test <- (length(colId) > 1 |

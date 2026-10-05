@@ -292,13 +292,13 @@ summary.AlphaPart <- function(
           )
           if (checkCov) {
             if (cov) {
-              tmpM2 <- object[[i]] %>%
-                group_by(object[[i]][, by]) %>%
+              tmpM2 <- object[[i]] |>
+                group_by(object[[i]][, by]) |>
                 do(data.frame(
                   cov = 2 *
                     t(cov(.[, cols[-1]], .[, cols[-1]])[
                       lower.tri(cov(.[, cols[-1]], .[, cols[-1]]), diag = FALSE)
-                    ])
+                  ])
                 ))
               if (is.null(ncol(tmpM2)) == FALSE) {
                 tmpM2 <- tmpM2[, -1]
@@ -322,13 +322,13 @@ summary.AlphaPart <- function(
           )
           if (checkCov) {
             if (cov) {
-              tmpM2 <- object[[i]] %>%
-                group_by(object[[i]][, by]) %>%
+              tmpM2 <- object[[i]] |>
+                group_by(object[[i]][, by]) |>
                 do(data.frame(
                   cov = 2 *
                     t(cov(.[, cols[-1]], .[, cols[-1]])[
                       lower.tri(cov(.[, cols[-1]], .[, cols[-1]]), diag = FALSE)
-                    ])
+                ])
                 ))
               if (is.null(ncol(tmpM2)) == FALSE) {
                 tmpM2 <- tmpM2[, -1]
@@ -431,7 +431,7 @@ summary.AlphaPart <- function(
 #' @method plot summaryAlphaPart
 #' @usage \method{plot}{summaryAlphaPart}(x, by, sortValue,
 #'   sortValueFUN, sortValueDec, addSum, paths, xlab, ylab, xlim, ylim,
-#'   color, lineSize, lineType, lineTypeList, useDirectLabels, method,
+#'   color, lineSize, lineType, lineTypeList, useDirectLabels,
 #'   labelPath, ...)
 #' @details Information in summaries of partitions of genetic values
 #'   can be overhelming due to a large volume of numbers. Plot method
@@ -459,10 +459,10 @@ summary.AlphaPart <- function(
 #'   list of vectors for more traits.
 #' @param ylim Numeric, a vector of two values with y-axis limits; use a
 #'   list of vectors for more traits.
-#' @param color Character, color names; by default a set of 54 colors is
-#'   predefined from the \pkg{RColorBrewer} package; in addition a black
-#'   colour is attached at the begining for the overall trend; if there
-#'   are more paths than colors then recycling occours.
+#' @param color Character, color names; by default a colour-blind-friendly
+#'   palette is generated with \code{grDevices::hcl.colors(..., palette = "viridis")}
+#'   and a black colour is attached at the beginning for the overall trend;
+#'   if there are more paths than colours then recycling occurs.
 #' @param lineSize Numeric, line width.
 #' @param lineType Numeric, line type (recycled); can be used only if
 #'   lineTypeList=NULL.
@@ -475,8 +475,8 @@ summary.AlphaPart <- function(
 #'   argument also causes recycling of colors for the upper level of
 #'   paths; if NULL all lines have a standard line type, otherwise
 #'   \code{lineType} does not have any effect.
-#' @param useDirectLabels Logical, use directlabels package for legend.
-#' @param method List, method for direct.label.
+#' @param useDirectLabels Logical, whether to label each line with its path name.
+#'   When set to FALSE, the line paths are shown in the legend instead.
 #' @param labelPath Character, legend title; used only if
 #'   \code{useDirectLabels=FALSE}.
 #' @param ...  Arguments passed to other functions (not used at the
@@ -506,7 +506,6 @@ plot.summaryAlphaPart <-
     lineType = 1,
     lineTypeList = NULL,
     useDirectLabels = TRUE,
-    method = list(last.qp, hjust = 0),
     labelPath = NULL,
     ...
   ) {
@@ -537,79 +536,15 @@ plot.summaryAlphaPart <-
       if (length(color) < nP) color <- rep(color, length = nP)
       color <- c("black", color)
     } else {
-      if (FALSE) {
-        ## Code to generate a bunch of qualitative colors
-        requireNamespace("RColorBrewer")
-        #library(package="RColorBrewer")
-        pals <- c("Set1", "Dark2", "Accent", "Paired", "Set2", "Set3")
-        palsN <- brewer.pal.info[pals, "maxcolors"]
-        color <- vector(length = sum(palsN))
-        j <- 1
-        for (i in seq(along = pals)) {
-          color[j:(j - 1 + palsN[i])] <-
-            do.call("brewer.pal", args = list(n = palsN[i], name = pals[i]))
-          j <- j + palsN[i]
-        }
-        color <- unique(color)
+      if (nP <= 8L) {
+        palette_name <- "Dark 2"
+      } else {
+        palette_name <- "viridis"
       }
       color <- c(
         "black",
-        "#E41A1C",
-        "#377EB8",
-        "#4DAF4A",
-        "#984EA3",
-        "#FF7F00",
-        "#FFFF33",
-        "#A65628",
-        "#F781BF",
-        "#999999",
-        "#1B9E77",
-        "#D95F02",
-        "#7570B3",
-        "#E7298A",
-        "#66A61E",
-        "#E6AB02",
-        "#A6761D",
-        "#666666",
-        "#7FC97F",
-        "#BEAED4",
-        "#FDC086",
-        "#FFFF99",
-        "#386CB0",
-        "#F0027F",
-        "#BF5B17",
-        "#A6CEE3",
-        "#1F78B4",
-        "#B2DF8A",
-        "#33A02C",
-        "#FB9A99",
-        "#E31A1C",
-        "#FDBF6F",
-        "#CAB2D6",
-        "#6A3D9A",
-        "#B15928",
-        "#66C2A5",
-        "#FC8D62",
-        "#8DA0CB",
-        "#E78AC3",
-        "#A6D854",
-        "#FFD92F",
-        "#E5C494",
-        "#B3B3B3",
-        "#8DD3C7",
-        "#FFFFB3",
-        "#BEBADA",
-        "#FB8072",
-        "#80B1D3",
-        "#FDB462",
-        "#B3DE69",
-        "#FCCDE5",
-        "#D9D9D9",
-        "#BC80BD",
-        "#CCEBC5",
-        "#FFED6F"
+        grDevices::hcl.colors(n = max(8L, nP), palette = palette_name)
       )
-      color <- color[color != "#FFFF33"] ## remove yellow color(s)
     }
     ## Line type
     if (is.null(lineTypeList)) {
@@ -637,7 +572,18 @@ plot.summaryAlphaPart <-
         colnames(tmp0) <- tmpCol
         warning("changing path name from 'N' to 'N.'")
       }
-      tmp <- melt(tmp0[, !(colnames(tmp0) %in% "N")], id = by)
+      columnsToMelt <- setdiff(names(tmp0), c("N", by))
+      tmp <- stats::reshape(
+        tmp0[, c(by, columnsToMelt)],
+        idvar = by,
+        varying = columnsToMelt,
+        v.names = "trait",
+        timevar = "path",
+        times = columnsToMelt,
+        direction = "long"
+      )
+      tmp <- tmp[, c(by, "path", "trait")]
+      rownames(tmp) <- NULL
       colnames(tmp) <- c("by", "path", "trait")
       if (is.logical(sortValue)) {
         if (sortValue) {
@@ -676,18 +622,31 @@ plot.summaryAlphaPart <-
       ## Prepare plot
       #trait in "" since it is not defined
       trait <- tmp$trait
-      p <- ggplot(
-        data = tmp,
-        mapping = aes(
-          x = .data[["by"]],
-          y = .data[["trait"]],
-          group = .data[["path"]],
-          colour = .data[["path"]],
-          linetype = .data[["path"]]
-        )
-      ) +
-        geom_line(linewidth = lineSize)
-    
+      if (isTRUE(useDirectLabels)) {
+        p <- ggplot(
+          data = tmp,
+          mapping = aes(
+            x = .data[["by"]],
+            y = .data[["trait"]],
+            group = .data[["path"]],
+            colour = .data[["path"]]
+          )
+        ) +
+          geom_line(linewidth = lineSize)
+      } else {
+        p <- ggplot(
+          data = tmp,
+          mapping = aes(
+            x = .data[["by"]],
+            y = .data[["trait"]],
+            group = .data[["path"]],
+            colour = .data[["path"]],
+            linetype = .data[["path"]]
+          )
+        ) +
+          geom_line(linewidth = lineSize)
+      }
+
       p <- p + xlab(label = ifelse(is.null(xlab), by, xlab))
       p <- p + ylab(label = ifelse(is.null(ylab), lT[i], ylab[i])) # lT[i] is the TRAIT!!!
       if (!is.null(xlim)) {
@@ -708,21 +667,50 @@ plot.summaryAlphaPart <-
         p <- p + scale_y_continuous(limits = ylimI)
       }
 
-      if (useDirectLabels)
-        p <- directlabels::direct.label(p = p, method = method)
-      ## This needs to follow direct.label
-      p <- p +
-        scale_colour_manual(
-          values = colorI,
-          name = ifelse(is.null(labelPath), path, labelPath)
-        )
-      p <- p +
-        scale_linetype_manual(
-          values = lineTypeI,
-          name = ifelse(is.null(labelPath), path, labelPath)
-        )
+      if (isTRUE(useDirectLabels)) {
+        label_df <- tmp[
+          !is.na(tmp$path) & !is.na(tmp$by) & !is.na(tmp$trait),
+          c("path", "by", "trait"),
+          drop = FALSE
+        ]
+        if (nrow(label_df) > 0L) {
+          label_df <- label_df[order(label_df$path, label_df$by), , drop = FALSE]
+          label_df <- label_df[!duplicated(label_df$path, fromLast = TRUE), , drop = FALSE]
+          path_levels <- levels(tmp$path)
+          path_colours <- colorI[seq_along(path_levels)]
+          names(path_colours) <- path_levels
+          path_colours[x$info$labelSum] <- "black"
+          p <- p + scale_colour_manual(values = path_colours, guide = "none")
+          p <- p +
+            geom_text(
+              data = label_df,
+              aes(
+                x = .data[["by"]],
+                y = .data[["trait"]],
+                label = .data[["path"]],
+                colour = .data[["path"]]
+              ),
+              hjust = -0.1,
+              vjust = 0.5,
+              show.legend = FALSE
+            )
+        }
+        p <- p + coord_cartesian(xlim = NULL, clip = "off")
+        p <- p + guides(colour = "none", linetype = "none")
+      } else {
+        p <- p +
+          scale_colour_manual(
+            values = colorI,
+            name = ifelse(is.null(labelPath), path, labelPath)
+          )
+        p <- p +
+          scale_linetype_manual(
+            values = lineTypeI,
+            name = ifelse(is.null(labelPath), path, labelPath)
+          )
+      }
       ret[[i]] <- p
-    }
+      }
 
     ## --- Return ---
 

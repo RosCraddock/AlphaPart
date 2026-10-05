@@ -42,7 +42,7 @@ and reduced variance.
 
 ![](man/figures/AlphaPart_var.png)
 
-# Instalation
+# Installation
 
 `AlphaPart` is published on CRAN so you can simply install it using:
 

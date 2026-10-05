@@ -6,14 +6,12 @@ jobs:
     - name: "Roxygen check"
       cache: packages
       r_packages:
-        - directlabels
         - gdata
         - ggplot2
         - pedigree
         - Rcpp
         - reshape
         - dplyr
-        - RColorBrewer
         - truncnorm
         - knitr
         - rmarkdown

@@ -6,7 +6,7 @@
 \usage{
 \method{plot}{summaryAlphaPart}(x, by, sortValue,
   sortValueFUN, sortValueDec, addSum, paths, xlab, ylab, xlim, ylim,
-  color, lineSize, lineType, lineTypeList, useDirectLabels, method,
+  color, lineSize, lineType, lineTypeList, useDirectLabels,
   labelPath, ...)
 }
 \arguments{
@@ -42,10 +42,10 @@ list of vectors for more traits.}
 \item{ylim}{Numeric, a vector of two values with y-axis limits; use a
 list of vectors for more traits.}
 
-\item{color}{Character, color names; by default a set of 54 colors is
-predefined from the \pkg{RColorBrewer} package; in addition a black
-colour is attached at the begining for the overall trend; if there
-are more paths than colors then recycling occours.}
+\item{color}{Character, color names; by default a colour-blind-friendly
+palette is generated with \code{grDevices::hcl.colors(..., palette = "viridis")}
+and a black colour is attached at the beginning for the overall trend;
+if there are more paths than colours then recycling occurs.}
 
 \item{lineSize}{Numeric, line width.}
 
@@ -62,9 +62,8 @@ argument also causes recycling of colors for the upper level of
 paths; if NULL all lines have a standard line type, otherwise
 \code{lineType} does not have any effect.}
 
-\item{useDirectLabels}{Logical, use directlabels package for legend.}
-
-\item{method}{List, method for direct.label.}
+\item{useDirectLabels}{Logical, whether to label each line with its path name.
+When set to FALSE, the line paths are shown in the legend instead.}
 
 \item{labelPath}{Character, legend title; used only if
 \code{useDirectLabels=FALSE}.}
