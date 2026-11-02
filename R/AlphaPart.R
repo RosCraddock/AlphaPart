@@ -430,7 +430,7 @@ if (isTRUE(any(upg_rows, na.rm = TRUE))) {
       value_check <- abs(
         unlist(x[id == m, colBV, drop = FALSE], use.names = FALSE) -
           foundersBV / noFounders
-      ) > 1e-6
+      ) > 1e-2
 
       if (any(value_check, na.rm = TRUE)) {
         warning(

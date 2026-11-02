@@ -35,18 +35,18 @@ library(ggridges) # for plotting
 Here we load the example dataset `AlphaPartCattleSim.rds` included in the package. The dataset contains a simulated cattle population from Oliveira et al. (2023).
 
 ```{r}
-data <- readRDS("./../inst/extdata/AlphaPartCattleSim.rds") %>%
-  dplyr::mutate(across(generation:mother, as.numeric)) %>%
-  dplyr::rename(status = type) %>%
-  dplyr::mutate(across(c("sex", "status"), as.factor)) %>%
-  dplyr::mutate(path = interaction(sex, status, sep = ":")) %>%
-  arrange(generation, ind) %>%
-  select(ind, father, mother, sex, status, path, generation, tbv, pheno) %>%
-  dplyr::mutate(generation = generation - 20) %>%
+data <- readRDS("./../inst/extdata/AlphaPartCattleSim.rds") |>
+  dplyr::mutate(across(generation:mother, as.numeric)) |>
+  dplyr::rename(status = type) |>
+  dplyr::mutate(across(c("sex", "status"), as.factor)) |>
+  dplyr::mutate(path = interaction(sex, status, sep = ":")) |>
+  arrange(generation, ind) |>
+  select(ind, father, mother, sex, status, path, generation, tbv, pheno) |>
+  dplyr::mutate(generation = generation - 20) |>
   droplevels()
 
 # Data head
-head(data) %>%
+head(data) |>
   knitr::kable(digits = 2)
 
 # Data size
@@ -82,7 +82,7 @@ As shown above, males are grouped into selected and non-selected because some we
 ```{r}
 part <- AlphaPart(data, colId = "ind", colFid = "father", 
                   colMid = "mother", colBV = "tbv", colPath = "path")
-head(part$tbv) %>%
+head(part$tbv) |>
   knitr::kable(digits = 2)
 ```
 
@@ -91,7 +91,7 @@ We use the generic `summary` function to summarize an `AlphaPart` object by  gen
 ```{r}
 partMean <- summary(part, by = "generation", FUN = mean)
 
-head(partMean$tbv) %>%
+head(partMean$tbv) |>
   knitr::kable(digits = 2)
 ```
 
@@ -100,7 +100,7 @@ Then, we look at the **changes in genetic variance** using `FUN = var`:
 ```{r}
 partVar <- summary(part, by = "generation", FUN = var, cov = TRUE)
 
-head(partVar$tbv) %>%
+head(partVar$tbv) |>
   knitr::kable(digits = 2)
 ```
 
@@ -111,7 +111,7 @@ Instead of using `FUN = var`, we could use some other method to summarize the pa
 ```{r}
 partMed <- summary(part, by = "generation", FUN = median)
 
-head(partMed$tbv) %>%
+head(partMed$tbv) |>
   knitr::kable(digits = 2)
 ```
 
@@ -120,7 +120,7 @@ head(partMed$tbv) %>%
 It is instructive to plot the distribution of breeding values and their partitions over generations. Since we had three paths, we will have three partitions.
 
 ```{r}
-part$tbv %>%
+part$tbv |>
   ggplot(aes(y = as.factor(generation), `tbv_F:Non-Selected`)) +
   geom_density_ridges(
     aes(fill = "F - Non-Selected", linetype = "F - Non-Selected"),
@@ -155,7 +155,7 @@ The above plot shows how the distribution of breeding values changed over genera
 We can now summarise these distributions by their means, variances, and covariances. **The plot of means** below shows the overall positive change in genetic mean and a clear major contribution to this trend from the selected males, followed by the females and no contribution from the non-selected males:
 
 ```{r}
-partMean$tbv %>%
+partMean$tbv |>
   ggplot(aes(y = Sum, x = generation, colour = "Sum")) +
   scale_linetype_manual(
     values = c("solid", "longdash", "dashed", "dotted"))+
@@ -177,7 +177,7 @@ partMean$tbv %>%
 **The plot of variances and covariances** shown below is more complex due to three lines for variances of the each partition and three lines for covariances between the partitions. The "sum" is the genetic variance (pink), which is decreasing over generations due to intense direction selection in the example (and no simulation of de-novo mutation!). This decrease is mainly driven by the small variance of the selected males partition (purple). The non-selected males partition has larger variance (blue) than the selected males partition. The female partition has the largest variance (orange), indicating that in this case females are a reservoir of genetic diversity. Note that the non-selected male partition has lower variance than the "non-selected" females because this partition of males does not contain the selected males partition. If we add up the two male partitions, their variance is expected to be similar to the variance of the female partition (because newborn males and females will each have about the same amount of genetic variance). Lastly, covariances between partitions are mostly hovering around zero in this example. When we estimate genetic values from the data, these covariances may be larger.
 
 ```{r}
-partVar$tbv %>%
+partVar$tbv |>
   ggplot(aes(y = Sum, x = generation, colour = "Sum")) +
   geom_line() +
   geom_line(aes(y = `F:Non-Selected`, x = generation,

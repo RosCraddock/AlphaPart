@@ -109,7 +109,7 @@ As we can see from the graph above, the partitioned genetic trends are now relat
 
 ### Including unknown parent groups
 
-By including unknown parent groups (also known as metafounders), the model considers the baseline contribution from the missing ancestry through additional partitions. Where multiple unknown parent groups are assigned, there will be an additional partition for each. This allows us to account for non-zero means in the founders without centering the genetic values and aligns with the assumptions of the model as the mean of the founders' Mendelian sampling term is zero. However, this requires specific modification to the pedigree for `AlphaPart`to produce results without error. First, we will show what **not** to do, then we will show the correct approach and present the theory using one unknown parent group. For multiple unknown parent groups, see the section *Including multiple unknown parent groups*.
+By including unknown parent groups (also known as metafounders), the model considers the baseline contribution from the missing ancestry through additional partitions. Where multiple unknown parent groups are assigned, there will be an additional partition for each. This allows us to account for non-zero means in the founders without centering the genetic values and aligns with the assumptions of the model as the mean of the founders' Mendelian sampling term will be approximately zero. However, this requires specific modification to the pedigree for `AlphaPart`to produce results without error. First, we will show what **not** to do, then we will show the correct approach and present the theory using one unknown parent group. For multiple unknown parent groups, see the section *Including multiple unknown parent groups*.
 
 Within the pedigree, we will assign one unknown parent group to all founding individuals. The nomenclature for unknown parent groups should be distinct to the other pedigree records, so here we will use the prefix "UPG" for unknown parent groups.
 
@@ -128,7 +128,7 @@ part <- AlphaPart(x = ped, colId = "id", colFid = "fid", colMid = "mid", colPath
 
 This has produced an error since when recoding the pedigree, the `UPG1` is replaced with 0 as has no matching record in `ped$id`. To correctly include unknown parent groups, we need to add records for them in the pedigree with appropriate genetic values. Essentially including them as pseudo-individuals through the Quass-Pollak transformation (Quass and Pollak, 1981).
 
-Here, we will add a record for `UPG1` with a genetic value equal to the mean of the founders and allocate its own group for partitioning. Note in `ped$sex`, we assign `UPG1` to identify the path for the additional partition when including an unknown parent group. Additionally, we allocate `UPG1` to generation 0 (one generation before the founders).
+Here, we will add a record for `UPG1` in generation 0 (one generation before the founders) with its own group for partitioning. Note in `ped$sex`, we assign `UPG1` to identify the path for the additional partition when including an unknown parent group. In this example, for the genetic value of the unknown parent group, we will use the mean of the founders' genetic values for `trait1`. This is a simple approach, however, other approaches are possible. For example with estimated breeding values, the calculated UPG effect contributing to the total estimated breeding values could be used depending on the model. Here, the expected mean Mendelian sampling term of the pedigree founders is zero, although this may differ in practice, which is generally acceptable.
 
 ```{r}
 upg <- c("UPG1", 0, 0, "UPG1", 0, mean(ped$trait1[ped$fid=="UPG1" & ped$mid=="UPG1"]), NA)
@@ -244,7 +244,7 @@ part[["trait1"]]
 
 ### Including multiple unknown parent groups
 
-For completeness, we will use the same example to demonstrate how to include two unknown parent groups. The assigned genetic values for each unknown parent group will be equal to the mean genetic value of their respective founders. In this case `UPG1`'s genetic value will be the mean of individuals 1 and 2, `UPG2`'s genetic value will be the mean of individuals 3 and 4. This is necessary so that the mean Mendelian sampling term of the founders are equal to zero. Note that each unknown parent group is assigned its own path in `ped$sex` for partitioning.
+For completeness, we will use the same example to demonstrate how to include two unknown parent groups. In this example, the assigned genetic values for each unknown parent group will be equal to the mean genetic value of their respective founders. Therefore, `UPG1`'s genetic value will be the mean of individuals 1 and 2, `UPG2`'s genetic value will be the mean of individuals 3 and 4. This is necessary so that the mean Mendelian sampling term of the founders are equal to zero. Alternatively, the genetic values of the unknown parent groups could be estimated from the UPG effects calculated with the estimated breediding values. Note that each unknown parent group is assigned its own path in `ped$sex` for partitioning.
 
 ```{r}
 ped <- ped[-1, ] # Remove previous UPG1 record
