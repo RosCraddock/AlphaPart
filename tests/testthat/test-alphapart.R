@@ -842,11 +842,11 @@ test_that("Test computation - 2nd example", {
 
 test_that("no UPGs and non-zero founder mean produces warning", {
   ped <- data.frame(
-    id = c("A", "B", "C"),
-    fid = c(NA, NA, "A"),
-    mid = c(NA, NA, "B"),
-    path = c("A", "B", "C"),
-    trait1 = c(1, 3, 2)
+    id = paste0("F", seq_len(20)),
+    fid = rep(NA_character_, 20),
+    mid = rep(NA_character_, 20),
+    path = paste0("F", seq_len(20)),
+    trait1 = seq(88, 101, length.out = 20)
   )
 
   warning_message <- NULL
@@ -938,27 +938,39 @@ test_that("UPG records must have their own path", {
   )
 })
 
-test_that("UPG breeding values differing from founder means produce a warning", {
+test_that("UPG Mendelian sampling warning identifies affected trait", {
+  n <- 20L
+  offspring_ids <- c(paste0("A", seq_len(n)), paste0("B", seq_len(n)))
+  residuals <- c(
+    seq(0.9, 1.1, length.out = n),
+    seq(-0.1, 0.1, length.out = n)
+  )
+  parent_average <- c(rep(10, n), rep(15, n))
+
   ped <- data.frame(
-    id = c("UPG1", "A", "B", "C"),
-    fid = c(NA, "UPG1", "UPG1", "A"),
-    mid = c(NA, "UPG1", "UPG1", "B"),
-    path = c("UPG1", "A", "B", "C"),
-    trait1 = c(10, 2, 4, 3)
+    id = c("UPG1", "UPG2", offspring_ids),
+    fid = c(NA_character_, NA_character_, rep("UPG1", 2L * n)),
+    mid = c(
+      NA_character_, NA_character_,
+      rep("UPG1", n), rep("UPG2", n)
+    ),
+    path = c("UPG1", "UPG2", offspring_ids),
+    trait1 = c(10, 20, parent_average + residuals)
   )
 
-  warning_message <- NULL
+  warning_messages <- character()
 
   withCallingHandlers(
     AlphaPart(x = ped, colId = "id", colFid = "fid", colMid = "mid", colPath = "path", colBV = "trait1", verbose = 0, UPGname = "UPG"),
     warning = function(condition) {
-      warning_message <<- conditionMessage(condition)
+      warning_messages <<- c(warning_messages, conditionMessage(condition))
       invokeRestart("muffleWarning")
     }
   )
 
-  expect_true(grepl("UPG1", warning_message))
-  expect_true(grepl("mean", warning_message, ignore.case = TRUE))
+  warning_text <- paste(warning_messages, collapse = "\n")
+  expect_match(warning_text, "Mendelian sampling")
+  expect_match(warning_text, "trait1")
 })
 
 test_that("UPG prefixes containing regex characters are matched literally", {
@@ -975,7 +987,7 @@ test_that("UPG prefixes containing regex characters are matched literally", {
   )
 })
 
-test_that("half-founders contribute one half to the founder mean", {
+test_that("half-founders are excluded from the founder mean", {
   ped <- data.frame(
     id = c("A", "B", "C", "D"),
     fid = c(NA, NA, "A", "A"),
@@ -987,23 +999,16 @@ test_that("half-founders contribute one half to the founder mean", {
   # Complete-founder mean is zero:
   # mean(c(1, -1)) == 0
   #
-  # Weighted founder mean includes D as a half-founder:
+  # A weighted founder mean includes D as a half-founder:
   # (1 * 1 + (-1) * 1 + 2 * 0.5) / (1 + 1 + 0.5) = 0.4
+  # But the half-founder D is excluded from the founder mean, so the mean is still zero.
   #
-  # Therefore a warning is expected only if half-founders are included.
+  # Therefore, a warning is not expected as half-founders are excluded.
 
   warning_message <- NULL
 
-  withCallingHandlers(
-    AlphaPart(x = ped, colId = "id", colFid = "fid", colMid = "mid", colPath = "path", colBV = "trait1", verbose = 0),
-    warning = function(condition) {
-      warning_message <<- conditionMessage(condition)
-      invokeRestart("muffleWarning")
-    }
-  )
-
-  expect_true(grepl("centering", warning_message, ignore.case = TRUE))
-  expect_true(grepl("trait1", warning_message, fixed = TRUE))
+  expect_no_warning(
+    AlphaPart(x = ped, colId = "id", colFid = "fid", colMid = "mid", colPath = "path", colBV = "trait1", verbose = 0))
 })
 
 test_that("incorrectly labelled UPG", {

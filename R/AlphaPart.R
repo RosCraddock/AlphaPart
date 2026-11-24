@@ -390,60 +390,43 @@ if (isTRUE(any(upg_rows, na.rm = TRUE))) {
     )
   }
 
-  ## Test whether each UPG genetic value is equal, or close, to the
-  ## mean genetic value of its grouped founders.
-  UPG <- id[upg_id]
+  ## Test whether pedigree founders (where both parents are allocated a UPG) have a mean Mendelian sampling term of zero.
+  ms_rows <- which(!upg_id & upg_fid & upg_mid)
+  if (length(ms_rows) >= 2L) {
+    foundersGV <- x[ms_rows, colBV, drop = FALSE]
 
-  for (m in UPG) {
-    foundersBV <- sapply(
-      colBV,
-      function(col) {
-        sum(
-          x[
-            (x[[colId]] != m & x[[colFid]] == m) |
-              (x[[colId]] != m & x[[colMid]] == m),
-            col
-          ],
-          na.rm = TRUE
+    UPG_PatRows <- match(fid[ms_rows], id)
+    patUPGgv <- x[UPG_PatRows, colBV, drop = FALSE]
+    UPG_MatRows <- match(mid[ms_rows], id)
+    matUPGgv <- x[UPG_MatRows, colBV, drop = FALSE]
+
+    ms_mean <- colMeans(foundersGV) -
+      (colMeans(patUPGgv) + colMeans(matUPGgv)) / 2
+    ms_var <- apply(foundersGV, 2, var, na.rm = TRUE) +
+      0.25 * apply(patUPGgv, 2, var, na.rm = TRUE) +
+      0.25 * apply(matUPGgv, 2, var, na.rm = TRUE) -
+      diag(cov(foundersGV, patUPGgv)) -
+      diag(cov(foundersGV, matUPGgv)) +
+      0.5 * diag(cov(patUPGgv, matUPGgv))
+    ms_n <- length(ms_rows)
+    critical_value <- if (ms_n < 31L) {
+      qt(0.975, df = ms_n - 1L)
+    } else {
+      qnorm(0.975)
+    }
+    lb <- ms_mean - critical_value * sqrt(ms_var) / sqrt(ms_n)
+    ub <- ms_mean + critical_value * sqrt(ms_var) / sqrt(ms_n)
+    test <- (lb < 0 & ub < 0) | (lb > 0 & ub > 0)
+    if (any(test)) {
+      triggered_traits <- names(x[colBV])[test]
+      warning(
+        paste0(
+          "The mean of the Mendelian sampling term for founders with both parents allocated to unknown parent groups is not zero for trait(s): ",
+          paste(triggered_traits, collapse = ", "),
+          ". Consider reviewing the genetic values of the unknown parent groups. ",
+          "See vignette founders.Rmd for more information. "
         )
-      }
-    )
-
-    noFounders <-
-      nrow(x[
-        x[[colId]] != m &
-          x[[colFid]] == m &
-          x[[colMid]] == m,
-      ]) +
-      0.5 * nrow(x[
-        x[[colId]] != m &
-          x[[colFid]] == m &
-          x[[colMid]] != m,
-      ]) +
-      0.5 * nrow(x[
-        x[[colId]] != m &
-          x[[colFid]] != m &
-          x[[colMid]] == m,
-      ])
-
-    if (noFounders > 0) {
-      value_check <- abs(
-        unlist(x[id == m, colBV, drop = FALSE], use.names = FALSE) -
-          foundersBV / noFounders
-      ) > 1e-2
-
-      if (any(value_check, na.rm = TRUE)) {
-        warning(
-          paste(
-            "The genetic value for all unknown parent groups is expected",
-            "to be equal to the mean genetic value of their grouped",
-            "founders.\n",
-            m,
-            "does not meet this expectation. See vignette founders.Rmd",
-            sep = " "
-          )
-        )
-      }
+      )
     }
   }
 }
@@ -508,19 +491,35 @@ if (isTRUE(any(upg_rows, na.rm = TRUE))) {
     )
   }
 
-  ## Where there are no UPGs, test the mean of the pedigree founders is near zero
+  ## Where there are no UPGs, formal test for if all pedigree founders (excluding half founders) have mean of zero
   if (isFALSE(any(upg_rows, na.rm = TRUE))) {
-    ## Test for if the mean of the founders and half-founders are zero
-    completefoundersGV <- y[y[,2] %in% c(unknown, NA, 0, "") & y[,3] %in% c(unknown, NA, 0, ""), 4:ncol(y), drop = FALSE]
-    halffoundersGV <- y[(y[,2] %in% c(unknown, NA, 0, "") & !y[,3] %in% c(unknown, NA, 0, "")) | (!y[,2] %in% c(unknown, NA, 0, "") & y[,3] %in% c(unknown, NA, 0, "")), 4:ncol(y), drop = FALSE]
-    allFoundersGV <- rbind(completefoundersGV, 0.5*halffoundersGV)
-    test <- colMeans(allFoundersGV, na.rm = TRUE)
-    if (any(abs(test) > 1e-1)) {
-      triggered_traits <- names(x[colBV])[abs(test) > 1e-1]
-      warning(paste0("The mean of the founders' genetic values is not zero for trait(s): ", 
-              triggered_traits, ". Consider centering or using unknown parent 
-              groups. If you have used unknown parent groups or metafounders, 
-              update `UPGname` with the prefix used. See vignette founders.Rmd for more."))
+    ## Test for if the mean of the founders (both parents are unknown)
+    foundersGV <- y[y[,2] %in% c(unknown, NA, 0, "") & y[,3] %in% c(unknown, NA, 0, ""), 4:ncol(y), drop = FALSE]
+    founder_n <- nrow(foundersGV)
+    if (founder_n >= 2) {
+      founder_mean <- colMeans(foundersGV, na.rm = TRUE)
+      founder_sd <- apply(foundersGV, 2, sd, na.rm = TRUE)
+
+      critical_value <- if (founder_n < 31) {
+        qt(0.975, df = founder_n - 1)
+      } else {
+        qnorm(0.975)
+      }
+
+    lb <- founder_mean - critical_value * founder_sd / sqrt(founder_n)
+    ub <- founder_mean + critical_value * founder_sd / sqrt(founder_n)
+    test <- (lb < 0 & ub < 0) | (lb > 0 & ub > 0)
+      if (any(test)) {
+        triggered_traits <- names(x[colBV])[test]
+        warning(
+        paste0(
+          "The mean of the founders' genetic values is not zero for trait(s): ",
+          paste(triggered_traits, collapse = ", "),
+          ". Consider centering or using unknown parent groups. ",
+          "If you have used unknown parent groups or metafounders, update ",
+          "`UPGname` with the prefix used to remove this warning. See vignette founders.Rmd for more."
+        ))
+      }
     }
   } 
 
