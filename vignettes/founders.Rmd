@@ -1,10 +1,10 @@
 ---
-title: "AlphaPart: Accounting for non-zero mean and structure in founders"
+title: "AlphaPart: Accounting for non-zero mean and structure in pedigree founders"
 author: "Rosalind Craddock and Gregor Gorjanc"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Founders}
+  %\VignetteIndexEntry{AlphaPart: Accounting for non-zero mean and structure in pedigree founders}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

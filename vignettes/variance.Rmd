@@ -4,7 +4,7 @@ author: "Thiago de Paula Oliveira and Gregor Gorjanc"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Variance}
+  %\VignetteIndexEntry{AlphaPart: Partitioning genetic values and summarising their trend with mean and variance}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

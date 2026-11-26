@@ -2,11 +2,14 @@
 # Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
 on:
   push:
+    branches: ['**']
+    paths: ["R/**"]
+  pull requests:
     paths: ["R/**"]
 
-name: document.yaml
+name: Documentation check
 
-permissions: read-all
+permissions: read
 
 jobs:
   document:
@@ -14,12 +17,10 @@ jobs:
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     permissions:
-      contents: write
+      contents: read
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup R
         uses: r-lib/actions/setup-r@v2
@@ -36,11 +37,11 @@ jobs:
         run: roxygen2::roxygenise()
         shell: Rscript {0}
 
-      - name: Commit and push changes
+      - name: Check documentation is up to date
         run: |
-          git config --local user.name "$GITHUB_ACTOR"
-          git config --local user.email "$GITHUB_ACTOR@users.noreply.github.com"
-          git add man/\* NAMESPACE DESCRIPTION
-          git commit -m "Update documentation" || echo "No changes to commit"
-          git pull --ff-only
-          git push origin
+          if ! git diff --quiet; then
+            echo "::error::Documentation is out of date."
+            echo "Please run devtools::document() locally and commit the updated files."
+            git diff
+            exit 1
+          fi

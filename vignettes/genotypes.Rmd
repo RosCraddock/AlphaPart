@@ -4,7 +4,7 @@ author: "Jana Obšteter, Thiago de Paula Oliveira, Ros Craddock, and Gregor Gorj
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{genotypes}
+  %\VignetteIndexEntry{AlphaPart: Partitioning genotypes}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

@@ -4,7 +4,7 @@ author: "Gregor Gorjanc"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{References}
+  %\VignetteIndexEntry{AlphaPart: References for genetic value and trend estimation and partitioning method}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

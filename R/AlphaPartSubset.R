@@ -19,16 +19,19 @@
 #'
 #' @example inst/examples/examples_AlphaPartSubset.R
 #' @export
-AlphaPartSubset <- function(x, paths=NULL) {
-
+AlphaPartSubset <- function(x, paths = NULL) {
   ## --- Setup ---
 
   test1 <- inherits(x, "AlphaPart")
   test2 <- inherits(x, "summaryAlphaPart")
-  if (!any(c(test1, test2))) stop("object 'x' must be of a 'AlphaPart' or 'summaryAlphaPart' class")
+  if (!any(c(test1, test2))) {
+    stop("object 'x' must be of a 'AlphaPart' or 'summaryAlphaPart' class")
+  }
 
   ## Do nothing
-  if (is.null(paths)) return(x)
+  if (is.null(paths)) {
+    return(x)
+  }
 
   ## Keep only uniquely defined paths
   paths <- unique(paths)
@@ -38,20 +41,12 @@ AlphaPartSubset <- function(x, paths=NULL) {
   ## Create "identity" map for specified paths and call AlphaPartSum to ease the
   ##   work with a rather complex object structure ;)
   nP <- length(paths)
-  map <- vector(mode="list", length=nP)
+  map <- vector(mode = "list", length = nP)
   for (i in 1:nP) {
     map[[i]] <- c(paths[i], paths[i])
   }
   ## Now add non-specified paths in the last mapping so AlphaPartSum will remove them
   map[[i]] <- c(map[[i]], x$info$lP[!(x$info$lP %in% paths)])
   ## Call AlphaPartSum
-  AlphaPartSum(x=x, map=map, remove=TRUE, call="AlphaPartPathSubset")
-
-
+  AlphaPartSum(x = x, map = map, remove = TRUE, call = "AlphaPartPathSubset")
 }
-
-
-
-
-
-

@@ -60,7 +60,7 @@ test_that("Test input for AlphaPart ped", {
   expect_true(all(tmp$trt1[1:3, c("fid", "mid")] == 0))
 
   # ... to test recode argument
-  
+
   ped3$idI <- seq_len(nrow(ped3))
   ped3$fidI <- match(ped3$fid, ped3$id)
   ped3$midI <- match(ped3$mid, ped3$id)
@@ -74,7 +74,10 @@ test_that("Test input for AlphaPart ped", {
   ))
   # Test whether correct codes but wrong ordering produces an error
   expect_no_error(AlphaPart(
-    x = ped3[sample(1:13, 13, replace = FALSE),c("idI", "fidI", "midI", "pat", "trt1")],
+    x = ped3[
+      sample(1:13, 13, replace = FALSE),
+      c("idI", "fidI", "midI", "pat", "trt1")
+    ],
     pathNA = TRUE,
     recode = FALSE,
     sort = FALSE,
@@ -141,6 +144,13 @@ test_that("Test input for AlphaPart ped", {
     pathNA = TRUE,
     recode = FALSE,
     unknown = 99,
+    verbose = 0
+  ))
+  expect_no_error(AlphaPart(
+    x = ped4[, c("idI", "fidI", "midI", "pat", "trt1")],
+    pathNA = TRUE,
+    recode = FALSE,
+    unknown = "99",
     verbose = 0
   ))
 
@@ -852,7 +862,15 @@ test_that("no UPGs and non-zero founder mean produces warning", {
   warning_message <- NULL
 
   withCallingHandlers(
-    AlphaPart(x = ped, colId = "id", colFid = "fid", colMid = "mid", colPath = "path", colBV = "trait1", verbose = 0),
+    AlphaPart(
+      x = ped,
+      colId = "id",
+      colFid = "fid",
+      colMid = "mid",
+      colPath = "path",
+      colBV = "trait1",
+      verbose = 0
+    ),
     warning = function(condition) {
       warning_message <<- conditionMessage(condition)
       invokeRestart("muffleWarning")
@@ -863,7 +881,7 @@ test_that("no UPGs and non-zero founder mean produces warning", {
   expect_true(grepl("UPG", warning_message, ignore.case = TRUE))
 })
 
-test_that("UPG has it's own record",{
+test_that("UPG has it's own record", {
   ped <- data.frame(
     id = c("A", "B", "C"),
     fid = c("UPG1", NA, "A"),
@@ -873,7 +891,16 @@ test_that("UPG has it's own record",{
   )
 
   expect_error(
-    AlphaPart(x = ped, colId = "id", colFid = "fid", colMid = "mid", colPath = "path", colBV = "trait1", verbose = 0, UPGname = "UPG"),
+    AlphaPart(
+      x = ped,
+      colId = "id",
+      colFid = "fid",
+      colMid = "mid",
+      colPath = "path",
+      colBV = "trait1",
+      verbose = 0,
+      UPGname = "UPG"
+    ),
     regexp = "own record|record.*UPG|unknown parent group"
   )
 })
@@ -888,7 +915,16 @@ test_that("duplicate UPG records produce an error", {
   )
 
   expect_error(
-    AlphaPart(x = ped, colId = "id", colFid = "fid", colMid = "mid", colPath = "path", colBV = "trait1", verbose = 0, UPGname = "UPG"),
+    AlphaPart(
+      x = ped,
+      colId = "id",
+      colFid = "fid",
+      colMid = "mid",
+      colPath = "path",
+      colBV = "trait1",
+      verbose = 0,
+      UPGname = "UPG"
+    ),
     regexp = "only one record|duplicate|unique"
   )
 })
@@ -903,7 +939,16 @@ test_that("UPG records must have unknown parents", {
   )
 
   expect_error(
-    AlphaPart(x = ped, colId = "id", colFid = "fid", colMid = "mid", colPath = "path", colBV = "trait1", verbose = 0, UPGname = "UPG"),
+    AlphaPart(
+      x = ped,
+      colId = "id",
+      colFid = "fid",
+      colMid = "mid",
+      colPath = "path",
+      colBV = "trait1",
+      verbose = 0,
+      UPGname = "UPG"
+    ),
     regexp = "unknown parent"
   )
 })
@@ -918,7 +963,16 @@ test_that("UPG records must have breeding values", {
   )
 
   expect_error(
-    AlphaPart(x = ped, colId = "id", colFid = "fid", colMid = "mid", colPath = "path", colBV = "trait1", verbose = 0, UPGname = "UPG"),
+    AlphaPart(
+      x = ped,
+      colId = "id",
+      colFid = "fid",
+      colMid = "mid",
+      colPath = "path",
+      colBV = "trait1",
+      verbose = 0,
+      UPGname = "UPG"
+    ),
     regexp = "Individual UPG1"
   )
 })
@@ -933,7 +987,16 @@ test_that("UPG records must have their own path", {
   )
 
   expect_error(
-    AlphaPart(x = ped, colId = "id", colFid = "fid", colMid = "mid", colPath = "path", colBV = "trait1", verbose = 0, UPGname = "UPG"),
+    AlphaPart(
+      x = ped,
+      colId = "id",
+      colFid = "fid",
+      colMid = "mid",
+      colPath = "path",
+      colBV = "trait1",
+      verbose = 0,
+      UPGname = "UPG"
+    ),
     regexp = "own path|path"
   )
 })
@@ -951,8 +1014,10 @@ test_that("UPG Mendelian sampling warning identifies affected trait", {
     id = c("UPG1", "UPG2", offspring_ids),
     fid = c(NA_character_, NA_character_, rep("UPG1", 2L * n)),
     mid = c(
-      NA_character_, NA_character_,
-      rep("UPG1", n), rep("UPG2", n)
+      NA_character_,
+      NA_character_,
+      rep("UPG1", n),
+      rep("UPG2", n)
     ),
     path = c("UPG1", "UPG2", offspring_ids),
     trait1 = c(10, 20, parent_average + residuals)
@@ -961,7 +1026,16 @@ test_that("UPG Mendelian sampling warning identifies affected trait", {
   warning_messages <- character()
 
   withCallingHandlers(
-    AlphaPart(x = ped, colId = "id", colFid = "fid", colMid = "mid", colPath = "path", colBV = "trait1", verbose = 0, UPGname = "UPG"),
+    AlphaPart(
+      x = ped,
+      colId = "id",
+      colFid = "fid",
+      colMid = "mid",
+      colPath = "path",
+      colBV = "trait1",
+      verbose = 0,
+      UPGname = "UPG"
+    ),
     warning = function(condition) {
       warning_messages <<- c(warning_messages, conditionMessage(condition))
       invokeRestart("muffleWarning")
@@ -983,7 +1057,16 @@ test_that("UPG prefixes containing regex characters are matched literally", {
   )
 
   expect_silent(
-    AlphaPart(x = ped, colId = "id", colFid = "fid", colMid = "mid", colPath = "path", colBV = "trait1", verbose = 0, UPGname = "MF.")
+    AlphaPart(
+      x = ped,
+      colId = "id",
+      colFid = "fid",
+      colMid = "mid",
+      colPath = "path",
+      colBV = "trait1",
+      verbose = 0,
+      UPGname = "MF."
+    )
   )
 })
 
@@ -1008,7 +1091,16 @@ test_that("half-founders are excluded from the founder mean", {
   warning_message <- NULL
 
   expect_no_warning(
-    AlphaPart(x = ped, colId = "id", colFid = "fid", colMid = "mid", colPath = "path", colBV = "trait1", verbose = 0))
+    AlphaPart(
+      x = ped,
+      colId = "id",
+      colFid = "fid",
+      colMid = "mid",
+      colPath = "path",
+      colBV = "trait1",
+      verbose = 0
+    )
+  )
 })
 
 test_that("incorrectly labelled UPG", {
@@ -1021,7 +1113,165 @@ test_that("incorrectly labelled UPG", {
   )
 
   expect_error(
-    AlphaPart(x = ped, colId = "id", colFid = "fid", colMid = "mid", colPath = "path", colBV = "trait1", verbose = 0, UPGname = "MF."),
+    AlphaPart(
+      x = ped,
+      colId = "id",
+      colFid = "fid",
+      colMid = "mid",
+      colPath = "path",
+      colBV = "trait1",
+      verbose = 0,
+      UPGname = "MF."
+    ),
     regexp = "MFx2|assigned a UPG"
   )
+})
+
+test_that("UPG mean Mendelian sampling test covers same and different UPG parents", {
+  same_upg <- data.frame(
+    id = c("UPG1", paste0("F", seq_len(20))),
+    fid = c(NA_character_, rep("UPG1", 20)),
+    mid = c(NA_character_, rep("UPG1", 20)),
+    path = c("UPG1", paste0("F", seq_len(20))),
+    trait1 = c(10, seq(10.9, 11.1, length.out = 20))
+  )
+
+  same_warning <- character()
+  withCallingHandlers(
+    AlphaPart(
+      same_upg,
+      colId = "id",
+      colFid = "fid",
+      colMid = "mid",
+      colPath = "path",
+      colBV = "trait1",
+      verbose = 0,
+      UPGname = "UPG"
+    ),
+    warning = function(w) {
+      same_warning <<- c(same_warning, conditionMessage(w))
+      invokeRestart("muffleWarning")
+    }
+  )
+  expect_match(paste(same_warning, collapse = "\n"), "Mendelian sampling")
+
+  different_upgs <- data.frame(
+    id = c("UPG1", "UPG2", paste0("F", seq_len(20))),
+    fid = c(NA_character_, NA_character_, rep("UPG1", 20)),
+    mid = c(NA_character_, NA_character_, rep("UPG2", 20)),
+    path = c("UPG1", "UPG2", paste0("F", seq_len(20))),
+    trait1 = c(10, 20, seq(14.9, 15.1, length.out = 20))
+  )
+
+  different_warning <- character()
+  withCallingHandlers(
+    AlphaPart(
+      different_upgs,
+      colId = "id",
+      colFid = "fid",
+      colMid = "mid",
+      colPath = "path",
+      colBV = "trait1",
+      verbose = 0,
+      UPGname = "UPG"
+    ),
+    warning = function(w) {
+      different_warning <<- c(different_warning, conditionMessage(w))
+      invokeRestart("muffleWarning")
+    }
+  )
+  expect_false(grepl(
+    "Mendelian sampling",
+    paste(different_warning, collapse = "\n"),
+    ignore.case = TRUE
+  ))
+})
+
+test_that("UPG mean Mendelian sampling test identifies multiple traits", {
+  ped <- data.frame(
+    id = c("UPG1", paste0("F", seq_len(20))),
+    fid = c(NA_character_, rep("UPG1", 20)),
+    mid = c(NA_character_, rep("UPG1", 20)),
+    path = c("UPG1", paste0("F", seq_len(20))),
+    trait1 = c(10, seq(10.9, 11.1, length.out = 20)),
+    trait2 = c(5, rep(5, 20))
+  )
+
+  warning_messages <- character()
+  withCallingHandlers(
+    AlphaPart(
+      ped,
+      colId = "id",
+      colFid = "fid",
+      colMid = "mid",
+      colPath = "path",
+      colBV = c("trait1", "trait2"),
+      verbose = 0,
+      UPGname = "UPG"
+    ),
+    warning = function(w) {
+      warning_messages <<- c(warning_messages, conditionMessage(w))
+      invokeRestart("muffleWarning")
+    }
+  )
+
+  warning_text <- paste(warning_messages, collapse = "\n")
+  expect_match(warning_text, "trait1")
+  expect_false(grepl("trait2", warning_text, fixed = TRUE))
+})
+
+test_that("UPG mean Mendelian sampling test skips a single founder", {
+  ped <- data.frame(
+    id = c("UPG1", "F1"),
+    fid = c(NA_character_, "UPG1"),
+    mid = c(NA_character_, "UPG1"),
+    path = c("UPG1", "F1"),
+    trait1 = c(10, 20)
+  )
+
+  expect_no_warning(
+    AlphaPart(
+      ped,
+      colId = "id",
+      colFid = "fid",
+      colMid = "mid",
+      colPath = "path",
+      colBV = "trait1",
+      verbose = 0,
+      UPGname = "UPG"
+    )
+  )
+})
+
+test_that("UPG mean Mendelian sampling test handles small and zero variance", {
+  ped <- data.frame(
+    id = c("UPG1", paste0("F", seq_len(20))),
+    fid = c(NA_character_, rep("UPG1", 20)),
+    mid = c(NA_character_, rep("UPG1", 20)),
+    path = c("UPG1", paste0("F", seq_len(20))),
+    trait1 = c(10, rep(11, 20)),
+    trait2 = c(5, rep(5, 20))
+  )
+
+  warning_messages <- character()
+  withCallingHandlers(
+    AlphaPart(
+      ped,
+      colId = "id",
+      colFid = "fid",
+      colMid = "mid",
+      colPath = "path",
+      colBV = c("trait1", "trait2"),
+      verbose = 0,
+      UPGname = "UPG"
+    ),
+    warning = function(w) {
+      warning_messages <<- c(warning_messages, conditionMessage(w))
+      invokeRestart("muffleWarning")
+    }
+  )
+
+  warning_text <- paste(warning_messages, collapse = "\n")
+  expect_match(warning_text, "trait1")
+  expect_false(grepl("trait2", warning_text, fixed = TRUE))
 })

@@ -43,17 +43,27 @@
 #'
 #' @export
 
-AlphaPartSum <- function (x, map=NULL, remove=TRUE, zeroPath=TRUE, call="AlphaPartSum") {
+AlphaPartSum <- function(
+  x,
+  map = NULL,
+  remove = TRUE,
+  zeroPath = TRUE,
+  call = "AlphaPartSum"
+) {
   ## --- Setup ---
-  
+
   test1 <- inherits(x, "AlphaPart")
   test2 <- inherits(x, "summaryAlphaPart")
-  if (!any(c(test1, test2))) stop("object 'x' must be of a 'AlphaPart' or 'summaryAlphaPart' class")
-  if (!is.list(map)) stop("object 'map' must be of a 'list' class")
+  if (!any(c(test1, test2))) {
+    stop("object 'x' must be of a 'AlphaPart' or 'summaryAlphaPart' class")
+  }
+  if (!is.list(map)) {
+    stop("object 'map' must be of a 'list' class")
+  }
 
   ## Initial number of columns
   nCOrig <- ifelse(test1, ncol(x[[1]]), ncol(x[[1]]))
-  nPOrig <- x$info$nP 
+  nPOrig <- x$info$nP
   nCRem <- 0
 
   ## Any unknown path?
@@ -72,42 +82,63 @@ AlphaPartSum <- function (x, map=NULL, remove=TRUE, zeroPath=TRUE, call="AlphaPa
     if (any(!testE)) {
       testT <- mapP[[i]] %in% mapT[1:i] ## path exists as a target defined up to now (at i)?
       if (any(!testT)) {
-        mapM <- c(mapM, mapP[[i]][(!testE & !testT)]) 
+        mapM <- c(mapM, mapP[[i]][(!testE & !testT)])
       }
     }
   }
   if (length(mapM) > 0) {
     if (!zeroPath) {
-      stop(paste("Unexisting path(s): ", paste(mapM, collapse=", ", sep=""), sep=""))
+      stop(paste(
+        "Unexisting path(s): ",
+        paste(mapM, collapse = ", ", sep = ""),
+        sep = ""
+      ))
     }
   }
 
   ## --- Action ---
 
   ## Loop over traits
-  for (t in 1:(length(x) - 1)) { ## t <- 1
+  for (t in 1:(length(x) - 1)) {
+    ## t <- 1
 
     ## Sum up partitions given the map
     if (call == "AlphaPartSum") {
       if (zeroPath) {
         for (i in mapM) {
-          x[[t]][, paste(x$info$lT[t], i, sep="_")] <- 0
+          x[[t]][, paste(x$info$lT[t], i, sep = "_")] <- 0
         }
       }
-      for (i in 1:length(map)) { ## i <- 1
+      for (i in 1:length(map)) {
+        ## i <- 1
         if (length(map[[i]]) > 1) {
-          if (test1) { ## x comes from AlphaPart(...)
-            if (length(map[[i]][2:length(map[[i]])]) > 1) { ## need this as rowSums() need an array of at least two dimensions
-              x[[t]][, paste(x$info$lT[t], map[[i]][1], sep="_")] <- rowSums(x[[t]][, paste(x$info$lT[t], map[[i]][2:length(map[[i]])], sep="_")])
+          if (test1) {
+            ## x comes from AlphaPart(...)
+            if (length(map[[i]][2:length(map[[i]])]) > 1) {
+              ## need this as rowSums() need an array of at least two dimensions
+              x[[t]][, paste(
+                x$info$lT[t],
+                map[[i]][1],
+                sep = "_"
+              )] <- rowSums(x[[t]][, paste(
+                x$info$lT[t],
+                map[[i]][2:length(map[[i]])],
+                sep = "_"
+              )])
             } else {
-              x[[t]][, paste(x$info$lT[t], map[[i]][1], sep="_")] <-         x[[t]][, paste(x$info$lT[t], map[[i]][2],                  sep="_")]
+              x[[t]][, paste(x$info$lT[t], map[[i]][1], sep = "_")] <- x[[
+                t
+              ]][, paste(x$info$lT[t], map[[i]][2], sep = "_")]
             }
-          } else {    ## x comes from summary(AlphaPart(...), ...)
-              if (length(map[[i]][2:length(map[[i]])]) > 1) {
-                x[[t]][, map[[i]][1]] <- rowSums(x[[t]][, map[[i]][2:length(map[[i]])]])
-              } else {
-                x[[t]][, map[[i]][1]] <-         x[[t]][, map[[i]][2]]
-              }            
+          } else {
+            ## x comes from summary(AlphaPart(...), ...)
+            if (length(map[[i]][2:length(map[[i]])]) > 1) {
+              x[[t]][, map[[i]][1]] <- rowSums(x[[t]][, map[[i]][
+                2:length(map[[i]])
+              ]])
+            } else {
+              x[[t]][, map[[i]][1]] <- x[[t]][, map[[i]][2]]
+            }
             ## for (j in ...)
           } ## if (test1)
         } ## if (length...)
@@ -117,7 +148,8 @@ AlphaPartSum <- function (x, map=NULL, remove=TRUE, zeroPath=TRUE, call="AlphaPa
     ## Remove original partitions (we do this after we go through the whole map!)
     if (remove) {
       remY <- remN <- NULL
-      for (i in 1:length(map)) { ## i <- 1
+      for (i in 1:length(map)) {
+        ## i <- 1
         if (length(map[[i]]) > 1) {
           remN <- c(remN, map[[i]][1])
           remY <- c(remY, map[[i]][2:length(map[[i]])])
@@ -127,30 +159,49 @@ AlphaPartSum <- function (x, map=NULL, remove=TRUE, zeroPath=TRUE, call="AlphaPa
       remN <- unique(remN)
       remY <- remY[!(remY %in% remN)]
       if (length(remY) > 0) {
-        if (test1) { ## x comes from AlphaPart(...)
-          for (i in remY) x[[t]][, paste(x$info$lT[t], i, sep="_")]     <- NULL          
-        } else {    ## x comes from summary(AlphaPart(...), ...)
-          for (i in remY) x[[t]][, i] <- NULL
+        if (test1) {
+          ## x comes from AlphaPart(...)
+          for (i in remY) {
+            x[[t]][, paste(x$info$lT[t], i, sep = "_")] <- NULL
+          }
+        } else {
+          ## x comes from summary(AlphaPart(...), ...)
+          for (i in remY) {
+            x[[t]][, i] <- NULL
+          }
         } ## if (test1)
       } ## if (length...)
     } ## if (remove)
-
   } ## for (t in ...)
 
   ## --- Fix meta info ---
 
-  if (remove) nCRem <- length(remY)
+  if (remove) {
+    nCRem <- length(remY)
+  }
   nC <- ifelse(test1, ncol(x[[1]]), ncol(x[[1]]))
   x$info$nP <- nC - (nCOrig - nPOrig)
   if (test1) {
-    x$info$lP <- gsub(pattern=paste(x$info$lT[t], "_", sep=""), replacement="", x=colnames(x[[t]])[(nCOrig - nPOrig + 1):nC], fixed=TRUE)
+    x$info$lP <- gsub(
+      pattern = paste(x$info$lT[t], "_", sep = ""),
+      replacement = "",
+      x = colnames(x[[t]])[(nCOrig - nPOrig + 1):nC],
+      fixed = TRUE
+    )
   } else {
     x$info$lP <- colnames(x[[t]])[(nCOrig - nPOrig + 1):nC]
-  }  
-  x$info$warn <- c(x$info$warn, paste("Consistency of the overall sum of partitions might not be correct due to the previous use of '", call, "'", sep=""))
+  }
+  x$info$warn <- c(
+    x$info$warn,
+    paste(
+      "Consistency of the overall sum of partitions might not be correct due to the previous use of '",
+      call,
+      "'",
+      sep = ""
+    )
+  )
 
   ## --- Return ---
 
   x
-
 }

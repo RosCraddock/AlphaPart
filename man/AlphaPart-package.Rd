@@ -30,11 +30,6 @@ Useful links:
 \author{
 \strong{Maintainer}: Gregor Gorjanc \email{gregor.gorjanc@gmail.com} (\href{https://orcid.org/0000-0001-8008-2787}{ORCID})
 
-Authors:
-\itemize{
-  \item Gregor Gorjanc \email{gregor.gorjanc@gmail.com} (\href{https://orcid.org/0000-0001-8008-2787}{ORCID})
-}
-
 Other contributors:
 \itemize{
   \item Jana Obsteter \email{jana.obsteter@kis.si} (\href{https://orcid.org/0000-0003-1511-3916}{ORCID}) [contributor]

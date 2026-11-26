@@ -68,8 +68,12 @@ write.csv.AlphaPart <- function(
 ) {
   # --- Setup ---
 
-  if (length(file) > 1) stop("'file' argument must be of length one")
-  if (!inherits(x, "AlphaPart")) stop("'x' must be of a 'AlphaPart' class")
+  if (length(file) > 1) {
+    stop("'file' argument must be of length one")
+  }
+  if (!inherits(x, "AlphaPart")) {
+    stop("'x' must be of a 'AlphaPart' class")
+  }
   fileOrig <- sub(pattern = ".csv$", replacement = "", x = file)
   ret <- NULL
 
@@ -113,9 +117,12 @@ write.csv.summaryAlphaPart <- function(
 ) {
   # --- Setup ---
 
-  if (length(file) > 1) stop("'file' argument must be of length one")
-  if (!inherits(x, "summaryAlphaPart"))
+  if (length(file) > 1) {
+    stop("'file' argument must be of length one")
+  }
+  if (!inherits(x, "summaryAlphaPart")) {
     stop("'x' must be of a 'summaryAlphaPart' class")
+  }
   fileOrig <- sub(pattern = ".csv$", replacement = "", x = file)
   ret <- NULL
 

@@ -7,3 +7,5 @@ src/*.so
 src/*.dll
 docs
 .DS_Store
+/doc/
+/Meta/

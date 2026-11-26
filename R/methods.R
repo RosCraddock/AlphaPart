@@ -76,8 +76,9 @@ print.summaryAlphaPart <- function(x, ...) {
     ")\n",
     sep = ""
   )
-  if (length(x$info$warn) > 0)
+  if (length(x$info$warn) > 0) {
     cat("   - warning: ", paste(x$info$warn, collapse = "\n"), "\n", sep = "")
+  }
 
   for (trt in x$info$lT) {
     cat("\n Trait:", trt, "\n\n")
@@ -127,8 +128,9 @@ print.AlphaPart <- function(x, n = 6, ...) {
     ")\n",
     sep = ""
   )
-  if (length(x$info$warn) > 0)
+  if (length(x$info$warn) > 0) {
     cat("   - warning: ", paste(x$info$warn, collapse = "\n"), "\n", sep = "")
+  }
 
   for (trt in x$info$lT) {
     cat("\n Trait:", trt, "\n\n")
@@ -223,14 +225,16 @@ summary.AlphaPart <- function(
     if (test == FALSE) {
       stop("argument 'FUN' must be a function", call. = FALSE)
     }
-    FUN = get(FUN)
+    FUN <- get(FUN)
   }
   # Test for covariance output
   test <- is.logical(cov)
   if (test == FALSE) {
     stop("argument 'cov' must be logical (TRUE or FALSE)", call. = FALSE)
   }
-  if (groupSummary) by <- object$by
+  if (groupSummary) {
+    by <- object$by
+  }
   if (!groupSummary) {
     test <- !is.null(by) && !(by %in% colnames(object[[1]]))
     if (test) {
@@ -298,7 +302,7 @@ summary.AlphaPart <- function(
                   cov = 2 *
                     t(cov(.[, cols[-1]], .[, cols[-1]])[
                       lower.tri(cov(.[, cols[-1]], .[, cols[-1]]), diag = FALSE)
-                  ])
+                    ])
                 ))
               if (is.null(ncol(tmpM2)) == FALSE) {
                 tmpM2 <- tmpM2[, -1]
@@ -328,7 +332,7 @@ summary.AlphaPart <- function(
                   cov = 2 *
                     t(cov(.[, cols[-1]], .[, cols[-1]])[
                       lower.tri(cov(.[, cols[-1]], .[, cols[-1]]), diag = FALSE)
-                ])
+                    ])
                 ))
               if (is.null(ncol(tmpM2)) == FALSE) {
                 tmpM2 <- tmpM2[, -1]
@@ -510,15 +514,17 @@ plot.summaryAlphaPart <-
     ...
   ) {
     ## --- Setup ---
-    if (!inherits(x, "summaryAlphaPart"))
+    if (!inherits(x, "summaryAlphaPart")) {
       stop("'x' must be of a summaryAlphaPart class")
+    }
 
     by <- x$info$by
     ## by argument
-    if (is.null(by))
+    if (is.null(by)) {
       stop(
         "output is provided only when the 'by' argument is defined on the 'summary' function"
       )
+    }
     path <- x$info$path
     lT <- x$info$lT
     nT <- x$info$nT
@@ -527,14 +533,19 @@ plot.summaryAlphaPart <-
     names(ret) <- x$info$lT
 
     ## Axis labels
-    if (!is.null(xlab) && length(xlab) > 1)
+    if (!is.null(xlab) && length(xlab) > 1) {
       stop("you can provide only one value for 'xlab'")
-    if (!is.null(ylab) && length(ylab) < nT) ylab <- rep(ylab, length = nT)
+    }
+    if (!is.null(ylab) && length(ylab) < nT) {
+      ylab <- rep(ylab, length = nT)
+    }
 
     ## Colors
     if (isTRUE(addSum)) {
       if (!missing(color)) {
-        if (length(color) < nP) color <- rep(color, length = nP)
+        if (length(color) < nP) {
+          color <- rep(color, length = nP)
+        }
         color <- c("black", color)
       } else {
         if (nP <= 8L) {
@@ -713,8 +724,16 @@ plot.summaryAlphaPart <-
           drop = FALSE
         ]
         if (nrow(label_df) > 0L) {
-          label_df <- label_df[order(label_df$path, label_df$by), , drop = FALSE]
-          label_df <- label_df[!duplicated(label_df$path, fromLast = TRUE), , drop = FALSE]
+          label_df <- label_df[
+            order(label_df$path, label_df$by),
+            ,
+            drop = FALSE
+          ]
+          label_df <- label_df[
+            !duplicated(label_df$path, fromLast = TRUE),
+            ,
+            drop = FALSE
+          ]
           path_levels <- levels(tmp$path)
           path_colours <- colorI[seq_along(path_levels)]
           names(path_colours) <- path_levels
@@ -751,7 +770,7 @@ plot.summaryAlphaPart <-
           )
       }
       ret[[i]] <- p
-      }
+    }
 
     ## --- Return ---
 
@@ -814,9 +833,12 @@ savePlot.plotSummaryAlphaPart <- function(
   traitsAsDir = FALSE, ##<<
   ... ##<<
 ) {
-  if (length(filename) > 1) stop("'filename' argument must be of length one")
-  if (!inherits(x, "plotSummaryAlphaPart"))
+  if (length(filename) > 1) {
+    stop("'filename' argument must be of length one")
+  }
+  if (!inherits(x, "plotSummaryAlphaPart")) {
     stop("'x' must be of a 'plotSummaryAlphaPart' class")
+  }
   filenameOrig <- sub(
     pattern = paste(".", type, "$", sep = ""),
     replacement = "",
@@ -843,7 +865,9 @@ savePlot.plotSummaryAlphaPart <- function(
     cat(fileA, "\n")
     print(list(file = fileA, ...))
     do.call(what = type, args = list(file = fileA, ...))
-    if (!is.null(pre.hook) && is.function(pre.hook)) pre.hook()
+    if (!is.null(pre.hook) && is.function(pre.hook)) {
+      pre.hook()
+    }
     print(x[[i]])
     dev.off()
   }

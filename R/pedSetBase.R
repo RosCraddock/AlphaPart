@@ -31,31 +31,60 @@
 #' @return Object \code{x} with removed rows for some individuals and their presence as parents.
 #' If \code{report=TRUE} progress is printed on the screen.
 #' @export
-pedSetBase <- function (x, keep=NULL, unknown=NA, report=TRUE, colId=1, colFid=2,  colMid=3) {
-
+pedSetBase <- function(
+  x,
+  keep = NULL,
+  unknown = NA,
+  report = TRUE,
+  colId = 1,
+  colFid = 2,
+  colMid = 3
+) {
   ## --- Setup ---
 
-  if (is.null(keep)) stop
+  if (is.null(keep)) {
+    stop
+  }
 
   test <- (length(colId) > 1 | length(colFid) > 1 | length(colMid) > 1)
-  if (test) stop("arguments 'colId', 'colFid', and 'colMid' must be of length 1")
+  if (test) {
+    stop("arguments 'colId', 'colFid', and 'colMid' must be of length 1")
+  }
 
   n <- nrow(x)
   test <- (length(keep) != n)
-  if (test) stop("the length of argument 'keep' must be the same as the number of entries (rows) in x")
+  if (test) {
+    stop(
+      "the length of argument 'keep' must be the same as the number of entries (rows) in x"
+    )
+  }
 
   ## --- Action ---
 
   if (report) {
     cat("All individuals:", n, "\n")
-    cat("Removing: ", sum(!keep, na.rm=TRUE), ", ",
-                      round(sum(!keep, na.rm=TRUE) / length(keep) * 100), " %\n", sep="")
+    cat(
+      "Removing: ",
+      sum(!keep, na.rm = TRUE),
+      ", ",
+      round(sum(!keep, na.rm = TRUE) / length(keep) * 100),
+      " %\n",
+      sep = ""
+    )
   }
   rem <- x[!keep, colId]
   ret <- x[keep, ]
-  ret[ret[, colFid] %in% rem & !isUnknown(x=ret[, colFid], unknown=unknown), colFid] <- unknown
-  ret[ret[, colMid] %in% rem & !isUnknown(x=ret[, colMid], unknown=unknown), colMid] <- unknown
-  if (report) cat("Kept:", nrow(ret), "\n")
+  ret[
+    ret[, colFid] %in% rem & !isUnknown(x = ret[, colFid], unknown = unknown),
+    colFid
+  ] <- unknown
+  ret[
+    ret[, colMid] %in% rem & !isUnknown(x = ret[, colMid], unknown = unknown),
+    colMid
+  ] <- unknown
+  if (report) {
+    cat("Kept:", nrow(ret), "\n")
+  }
 
   ## --- Return ---
 

@@ -4,7 +4,7 @@ author: "Gregor Gorjanc, Jana Obsteter, and Thiago de Paula Oliveira"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Introduction}
+  %\VignetteIndexEntry{Introduction to AlphaPart}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

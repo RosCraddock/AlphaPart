@@ -4,7 +4,7 @@ author: "Thiago de Paula Oliveira and Gregor Gorjanc"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{samples}
+  %\VignetteIndexEntry{AlphaPart: Accounting for uncertainty of estimated genetic values in partitioning}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

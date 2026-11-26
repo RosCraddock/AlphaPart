@@ -40,9 +40,13 @@ isUnknown <- function(x, unknown = NA, ...) UseMethod("isUnknown")
 #' @usage \method{isUnknown}{default}(x, unknown, ...)
 #' @export
 isUnknown.default <- function(x, unknown = NA, ...) {
-  if (is.list(unknown)) unknown <- unlist(unknown)
+  if (is.list(unknown)) {
+    unknown <- unlist(unknown)
+  }
   ret <- x %in% unknown
-  if (any(is.na(unknown))) ret <- ret | is.na(x)
+  if (any(is.na(unknown))) {
+    ret <- ret | is.na(x)
+  }
   ret
 }
 
@@ -97,18 +101,20 @@ isUnknown.data.frame <- function(x, unknown = NA, ...) {
 #' @method isUnknown matrix
 #' @usage \method{isUnknown}{matrix}(x, unknown, ...)
 #' @export
-isUnknown.matrix <- function(x, unknown = NA, ...)
+isUnknown.matrix <- function(x, unknown = NA, ...) {
   apply(
     X = x,
     MARGIN = ifelse(ncol(x) > nrow(x), 1, 2),
     FUN = isUnknown,
     unknown = unknown
   )
+}
 
 #' @rdname UnknownFuns
 #' @export
-unknownToNA <- function(x, unknown, warning = FALSE, ...)
+unknownToNA <- function(x, unknown, warning = FALSE, ...) {
   UseMethod("unknownToNA")
+}
 
 #' @rdname UnknownFuns
 #' @method unknownToNA default
@@ -132,7 +138,9 @@ unknownToNA.factor <- function(x, unknown, warning = FALSE, ...) {
   if (warning) {
     if (any(is.na(x))) warning("'x' already has NA")
   }
-  if (is.list(unknown)) unknown <- unlist(unknown)
+  if (is.list(unknown)) {
+    unknown <- unlist(unknown)
+  }
   ## Levels handling - read help page on this
   levs <- levels(x)
   levs <- levs[!(levs %in% unknown)]
@@ -166,23 +174,28 @@ unknownToNA.data.frame <- function(x, unknown, warning = FALSE, ...) {
 
 #' @rdname UnknownFuns
 #' @export
-NAToUnknown <- function(x, unknown, force = FALSE, call. = FALSE, ...)
+NAToUnknown <- function(x, unknown, force = FALSE, call. = FALSE, ...) {
   UseMethod("NAToUnknown")
+}
 
 #' @method NAToUnknown default
 #' @usage \method{NAToUnknown}{default}(x, unknown, force, call., ...)
 #' @export
 #' @rdname UnknownFuns
 NAToUnknown.default <- function(x, unknown, force = FALSE, call. = FALSE, ...) {
-  if (length(as.character(unknown)) != 1)
+  if (length(as.character(unknown)) != 1) {
     # as.character allows also POSIXlt
     stop("'unknown' must be a single value")
-  if (any(isUnknown(x, unknown = unknown)) && !force)
+  }
+  if (any(isUnknown(x, unknown = unknown)) && !force) {
     stop(sprintf("'x' already has value %s", dQuote(unknown)))
+  }
   classX <- class(x)[1]
   classUnk <- class(unknown)[1]
-  if (classX != classUnk &&
-    !(is.matrix(x) && is.numeric(unknown))) {
+  if (
+    classX != classUnk &&
+      !(is.matrix(x) && is.numeric(unknown))
+  ) {
     tmp <- c("integer", "numeric")
     if (!(classX %in% tmp && classUnk %in% tmp)) {
       warning(
@@ -205,7 +218,9 @@ NAToUnknown.default <- function(x, unknown, force = FALSE, call. = FALSE, ...) {
 #' @usage \method{NAToUnknown}{factor}(x, unknown, force, call., ...)
 #' @export
 NAToUnknown.factor <- function(x, unknown, force = FALSE, call. = FALSE, ...) {
-  if (length(unknown) != 1) stop("'unknown' must be a single value")
+  if (length(unknown) != 1) {
+    stop("'unknown' must be a single value")
+  }
   if (any(isUnknown(x, unknown = unknown))) {
     if (!force) stop(sprintf("'x' already has level %s", dQuote(unknown)))
   } else {
@@ -215,8 +230,9 @@ NAToUnknown.factor <- function(x, unknown, force = FALSE, call. = FALSE, ...) {
     )
   }
   x[is.na(x)] <- unknown
-  if (!force)
+  if (!force) {
     warning(sprintf("new level is introduced: %s", unknown), call. = call.)
+  }
   x
 }
 
@@ -282,11 +298,12 @@ NAToUnknown.data.frame <- function(
   if (!namesXNullTest) {
     ## Check for nonexistent name
     test <- !(unkNames %in% namesX)
-    if (any(test))
+    if (any(test)) {
       stop(sprintf(
         "name(s) %s not in names of 'x'",
         paste(sQuote(unkNames[test]), collapse = " ")
       ))
+    }
   }
 
   ## --- Recycle ---
@@ -403,7 +420,9 @@ format.object_sizes <- function(
   ...
 ) {
   if (!missing(units)) {
-    if (units == "bytes") paste(x, "bytes") else
+    if (units == "bytes") {
+      paste(x, "bytes")
+    } else {
       humanReadable(
         x,
         standard = standard,
@@ -413,8 +432,10 @@ format.object_sizes <- function(
         sep = sep,
         justify = justify
       )
-  } else if (is.null(humanReadable) || humanReadable == FALSE)
-    paste(x, "bytes") else
+    }
+  } else if (is.null(humanReadable) || humanReadable == FALSE) {
+    paste(x, "bytes")
+  } else {
     humanReadable(
       x,
       standard = standard,
@@ -424,6 +445,7 @@ format.object_sizes <- function(
       sep = sep,
       justify = justify
     )
+  }
 }
 
 #' @export
@@ -433,8 +455,9 @@ is.object_sizes <- function(x) inherits(x, what = "object_sizes")
 #' @export
 #' @rdname object.size
 as.object_sizes <- function(x) {
-  if (!is.numeric(x) || any(x < 0))
+  if (!is.numeric(x) || any(x < 0)) {
     stop("'x' must be a positive numeric vector")
+  }
 
   class(x) <- c("object_sizes", "numeric")
   x
@@ -444,7 +467,9 @@ as.object_sizes <- function(x) {
 #' @rdname object.size
 c.object_sizes <- function(..., recursive = FALSE) {
   x <- NextMethod()
-  if (is.numeric(x)) class(x) <- c("object_sizes", "numeric")
+  if (is.numeric(x)) {
+    class(x) <- c("object_sizes", "numeric")
+  }
   x
 }
 
@@ -564,7 +589,9 @@ mapLevels.factor <- function(
 
   if (is.factor(x)) {
     # factor
-    if (drop) x <- factor(x)
+    if (drop) {
+      x <- factor(x)
+    }
     nlevs <- nlevels(x)
     levs <- levels(x)
   } else {
@@ -709,7 +736,9 @@ is.listLevelsMap <- function(x) inherits(x = x, what = "listLevelsMap")
 #' @rdname mapLevels
 #' @export
 as.levelsMap <- function(x, check = TRUE, ...) {
-  if (check) .checkLevelsMap(x, method = "raw")
+  if (check) {
+    .checkLevelsMap(x, method = "raw")
+  }
   class(x) <- "levelsMap"
   unique(x, ...)
 }
@@ -717,7 +746,9 @@ as.levelsMap <- function(x, check = TRUE, ...) {
 #' @rdname mapLevels
 #' @export
 as.listLevelsMap <- function(x, check = TRUE) {
-  if (check) .checkListLevelsMap(x, method = "raw")
+  if (check) {
+    .checkListLevelsMap(x, method = "raw")
+  }
   class(x) <- "listLevelsMap"
   x
 }
@@ -729,11 +760,13 @@ as.listLevelsMap <- function(x, check = TRUE) {
   also <- "\b"
   if (method == "class") {
     also <- "also"
-    if (!is.levelsMap(x))
+    if (!is.levelsMap(x)) {
       stop(sprintf("'%s' must be a %s", xLab, dQuote("levelsMap")))
+    }
   }
-  if (!is.list(x) || is.null(names(x)))
+  if (!is.list(x) || is.null(names(x))) {
     stop(sprintf("'%s' must be %s a named list", xLab, also))
+  }
 
   ## Components can be of different length
   ##  if(!all(sapply(x, FUN=length) == 1))
@@ -747,16 +780,18 @@ as.listLevelsMap <- function(x, check = TRUE) {
   also <- "\b"
   if (method == "class") {
     also <- "also"
-    if (!is.listLevelsMap(x))
+    if (!is.listLevelsMap(x)) {
       stop(sprintf("'%s' must be a %s", xLab, dQuote("listLevelsMap")))
+    }
   }
-  if (!is.list(x) || any(!sapply(x, FUN = is.levelsMap)))
+  if (!is.list(x) || any(!sapply(x, FUN = is.levelsMap))) {
     stop(sprintf(
       "'%s' must be %s a list of %s",
       xLab,
       also,
       dQuote("levelsMap")
     ))
+  }
   lapply(x, FUN = .checkLevelsMap, method = method)
 }
 
@@ -778,13 +813,18 @@ c.listLevelsMap <- function(..., sort = TRUE, recursive = FALSE) {
   if (!recursive) {
     class(x) <- "listLevelsMap"
   } else {
-    if (any(!sapply(x, FUN = .isCharacterMap)))
+    if (any(!sapply(x, FUN = .isCharacterMap))) {
       stop(sprintf("can not combine integer %s", dQuote("levelsMaps")))
-    if (!is.null(names(x))) names(x) <- NULL
+    }
+    if (!is.null(names(x))) {
+      names(x) <- NULL
+    }
     x <- unlist(x, recursive = FALSE)
     ## how to merge components with the same name?
     class(x) <- "levelsMap"
-    if (sort) x <- sort(x)
+    if (sort) {
+      x <- sort(x)
+    }
     x <- unique(x)
   }
   x
@@ -792,8 +832,9 @@ c.listLevelsMap <- function(..., sort = TRUE, recursive = FALSE) {
 
 #' @rdname mapLevels
 #' @export
-sort.levelsMap <- function(x, decreasing = FALSE, na.last = TRUE, ...)
+sort.levelsMap <- function(x, decreasing = FALSE, na.last = TRUE, ...) {
   x[order(names(x), na.last = na.last, decreasing = decreasing)]
+}
 
 #' @rdname mapLevels
 #' @export
@@ -844,11 +885,12 @@ unique.levelsMap <- function(x, incomparables = FALSE, ...) {
   ## --- Checks ---
 
   classX <- c("integer", "character", "factor")
-  if (any(!(class(x) %in% classX)))
+  if (any(!(class(x) %in% classX))) {
     stop(sprintf(
       "'x' must be either: %s",
       paste(dQuote(classX), collapse = ", ")
     ))
+  }
 
   .checkLevelsMap(x = value, method = "class")
 
@@ -859,25 +901,37 @@ unique.levelsMap <- function(x, incomparables = FALSE, ...) {
 
   if (int) {
     # codes=TRUE
-    if (is.integer(x)) x <- factor(x)
-    if (is.factor(x)) levels(x) <- value
-    if (is.character(x))
+    if (is.integer(x)) {
+      x <- factor(x)
+    }
+    if (is.factor(x)) {
+      levels(x) <- value
+    }
+    if (is.character(x)) {
       stop(sprintf(
         "can not apply integer %s to %s",
         dQuote("levelsMap"),
         dQuote("character")
       ))
+    }
   } else {
     # codes=FALSE
-    if (!char) stop("all components of 'value' must be of the same class")
-    if (is.character(x)) x <- factor(x)
-    if (is.factor(x)) levels(x) <- value
-    if (is.integer(x))
+    if (!char) {
+      stop("all components of 'value' must be of the same class")
+    }
+    if (is.character(x)) {
+      x <- factor(x)
+    }
+    if (is.factor(x)) {
+      levels(x) <- value
+    }
+    if (is.integer(x)) {
       stop(sprintf(
         "can not apply character %s to %s",
         dQuote("levelsMap"),
         dQuote("integer")
       ))
+    }
   }
   x
 }
